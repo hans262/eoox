@@ -1,0 +1,11 @@
+out
+logs
+docs
+upfiles
+lib
+
+node_modules
+package-lock.json
+pnpm-lock.yaml
+
+.DS_Store
