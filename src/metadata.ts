@@ -1,5 +1,5 @@
 import type { Express } from "express";
-import path from "node:path";
+import { posix } from "node:path";
 
 export type Method = "get" | "post" | "put" | "delete";
 
@@ -38,7 +38,7 @@ export const useControllers = (
     const items = metadatas.filter((m) => m.constructorName === c.name);
     for (const item of items) {
       if (!item.cpath || !item.mpath) continue;
-      let _path = path.posix.join("/", prefix, item.cpath, item.mpath);
+      let _path = posix.join("/", prefix, item.cpath, item.mpath);
       app[item.method!](
         _path,
         item.instance[item.propertyKey].bind(item.instance)
