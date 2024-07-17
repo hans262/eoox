@@ -3,36 +3,33 @@ import { metadatas, Method } from "./metadata.js";
 export function Controller(cpath: string): ClassDecorator {
   return (constructor: any) => {
     const instance = new constructor();
-    metadatas.map((m) => {
-      if (m.constructorName === constructor.name) {
-        m.cpath = cpath;
-        //添加controller实例
-        m.instance = instance;
-        return true;
+    for (let i = 0; i < metadatas.length; i++) {
+      const item = metadatas[i];
+      if (item.constructorName === constructor.name) {
+        item.cpath = cpath;
+        item.instance = instance;
       }
-    });
+    }
   };
 }
 
 function createMethodDecorator(method: Method) {
-  return (mpath: string = ""): MethodDecorator =>
+  return (mpath = ""): MethodDecorator =>
     (target, propertyKey) => {
-      const meta = metadatas.find((m) => {
-        if (
+      const meta = metadatas.find(
+        (m) =>
           m.constructorName === target.constructor.name &&
-          m.propertyKey === propertyKey
-        ) {
-          m.method = method;
-          m.mpath = mpath;
-          return true;
-        }
-      });
-
-      if (!meta) {
+          m.functionName === propertyKey
+      );
+      if (meta) {
+        meta.method = method;
+        meta.mpath = mpath;
+      } else {
         metadatas.push({
+          cpath: "", //先给一个默认值
           method,
           mpath,
-          propertyKey,
+          functionName: propertyKey,
           constructorName: target.constructor.name,
         });
       }
@@ -43,3 +40,4 @@ export const Get = createMethodDecorator("get");
 export const Post = createMethodDecorator("post");
 export const Put = createMethodDecorator("put");
 export const Delete = createMethodDecorator("delete");
+export const Patch = createMethodDecorator("patch");

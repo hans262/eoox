@@ -3,9 +3,15 @@ import type { Request, Response } from "express";
 
 @Controller("test")
 export class Test {
-  // path -> /test/abc
-  @Get("abc")
+  // path -> /test
+  @Get()
   get(req: Request, res: Response) {
+    res.json(req.query);
+  }
+
+  // path -> /test/abc
+  @Get('abc')
+  get2(req: Request, res: Response) {
     res.json(req.query);
   }
 

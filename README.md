@@ -17,6 +17,7 @@ npm install eoox
 - @Post
 - @Put
 - @Delete
+- @Patch
 
 ## How to use
 
@@ -44,8 +45,8 @@ export class Test {
 Then use it in your express application.
 
 ```ts
-import { useControllers } from "eoox";
+import { useEoox } from "eoox";
 const app = express();
-useControllers(app, "/api", [Test]);
+useEoox(app, "/api", [Test]);
 // The second parameter represents your routing prefix.
 ```

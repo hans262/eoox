@@ -1,19 +1,19 @@
 import type { Express } from "express";
 import { posix } from "node:path";
 
-export type Method = "get" | "post" | "put" | "delete";
+export type Method = "get" | "post" | "put" | "delete" | "patch";
 
 export interface Metadata {
-  /**控制器对象上的path，必传参数 */
-  cpath?: string;
-  /**方法路径，可不传，默认值 = '' */
+  /**控制器路径，必传参数，不能为空字符串 */
+  cpath: string;
+  /**方法路径，默认值 = '' */
   mpath?: string;
   /**控制器对象名称 */
   constructorName: string;
   /**请求类型 */
-  method?: Method;
+  method: Method;
   /**函数名称 */
-  propertyKey: string | symbol;
+  functionName: string | symbol;
   /**控制器对象实例，挂装饰器才会有 */
   instance?: any;
 }
@@ -24,25 +24,52 @@ export interface Metadata {
 export const metadatas: Metadata[] = [];
 
 /**
- * 安装控制器函数
- * @param app
- * @param prefix
- * @param cs
+ * 安装控制器
+ * @param app Express实例
+ * @param prefix api前缀
+ * @param controllers 控制器集合
+ * @deprecated 请使用新的控制器注册函数，useEoox
  */
 export const useControllers = (
   app: Express,
   prefix: string,
-  cs: (new () => any)[]
+  controllers: (new () => any)[]
 ) => {
-  for (const c of cs) {
+  for (const c of controllers) {
     const items = metadatas.filter((m) => m.constructorName === c.name);
     for (const item of items) {
-      if (!item.cpath || !item.mpath) continue;
-      let _path = posix.join("/", prefix, item.cpath, item.mpath);
-      app[item.method!](
-        _path,
-        item.instance[item.propertyKey].bind(item.instance)
-      );
+      const path = posix.join("/", prefix, item.cpath, item.mpath!);
+      if (item.instance) {
+        app[item.method](
+          path,
+          item.instance[item.functionName].bind(item.instance)
+        );
+      }
+    }
+  }
+};
+
+/**
+ * 安装控制器
+ * @param app Express实例
+ * @param prefix api前缀
+ * @param controllers 控制器集合
+ */
+export const useEoox = (
+  app: Express,
+  prefix: string,
+  controllers: (new () => any)[]
+) => {
+  for (const c of controllers) {
+    const items = metadatas.filter((m) => m.constructorName === c.name);
+    for (const item of items) {
+      const path = posix.join("/", prefix, item.cpath, item.mpath!);
+      if (item.instance) {
+        app[item.method](
+          path,
+          item.instance[item.functionName].bind(item.instance)
+        );
+      }
     }
   }
 };
