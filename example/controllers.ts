@@ -1,23 +1,13 @@
 import { Controller, Get, Post } from "../src/index.js";
 import type { Request, Response, NextFunction } from "express";
 
-process.on('unhandledRejection', (reason, promise) => {
-  console.log('Unhandled Rejection at:', promise, 'reason:', reason);
-});
-
-async function fu(){
-  throw new Error("异步错误2");
-}
-
 @Controller("test")
 export class Test {
   // path -> /test
   @Get()
   async get(req: Request, res: Response, next: NextFunction) {
     // next('21312')
-    fu()
-    // throw new Error("异步错误");
-    // console.log(req, res)
+    throw new Error("异步错误");
     // res.json(req.query);
   }
 

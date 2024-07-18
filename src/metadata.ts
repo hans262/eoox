@@ -31,7 +31,7 @@ export const metadatas: Metadata[] = [];
  * @deprecated 请使用新的控制器注册函数，useEoox
  */
 export const useControllers = (
-  app: Express,
+  app: any,
   prefix: string,
   controllers: (new () => any)[]
 ) => {

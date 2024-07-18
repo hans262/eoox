@@ -24,3 +24,7 @@ app.use(
 app.listen(PORT, () => {
   console.log(`http://localhost:${PORT}`);
 });
+
+process.on("unhandledRejection", (reason, promise) => {
+  console.log("你有未处理的异常: ", reason);
+});
