@@ -24,11 +24,3 @@ app.use(
 app.listen(PORT, () => {
   console.log(`http://localhost:${PORT}`);
 });
-
-
-process.on("SIGTERM", () => {
-  console.log("SIGTERM signal received: closing HTTP server");
-  app.close(() => {
-    console.log("HTTP server closed");
-  });
-});
