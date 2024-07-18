@@ -65,10 +65,18 @@ export const useEoox = (
     for (const item of items) {
       const path = posix.join("/", prefix, item.cpath, item.mpath!);
       if (item.instance) {
-        app[item.method](
-          path,
-          item.instance[item.functionName].bind(item.instance)
-        );
+        // 为了支持express捕获异步错误的处理，express 5 已经完善了该功能
+        app[item.method](path, (req, res, next) => {
+          try {
+            item.instance[item.functionName]
+              .bind(item.instance)(req, res, next)
+              ?.catch(next);
+            //捕获异步错误
+          } catch (err) {
+            //捕获同步错误
+            next(err);
+          }
+        });
       }
     }
   }

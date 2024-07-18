@@ -19,6 +19,12 @@ npm install eoox
 - @Delete
 - @Patch
 
+You need to configure in tsconfig.json:
+
+```json
+{ "experimentalDecorators": true }
+```
+
 ## How to use
 
 First, create your controller.
