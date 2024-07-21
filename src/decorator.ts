@@ -26,7 +26,6 @@ function createMethodDecorator(method: Method) {
         meta.mpath = mpath;
       } else {
         metadatas.push({
-          cpath: "", //先给一个默认值
           method,
           mpath,
           functionName: propertyKey,

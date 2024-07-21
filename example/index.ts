@@ -17,7 +17,10 @@ app.use(
     next: express.NextFunction
   ) => {
     console.log(err);
-    res.status(500).send("<p>500 Error</p>");
+    res.status(500).send(`
+      <h2>500 Error</h2>
+      <p>${err}</p>
+    `);
   }
 );
 
@@ -25,6 +28,6 @@ app.listen(PORT, () => {
   console.log(`http://localhost:${PORT}`);
 });
 
-process.on("unhandledRejection", (reason, promise) => {
-  console.log("你有未处理的异常: ", reason);
+process.on("unhandledRejection", (err) => {
+  console.log("未处理的异常: ", err);
 });

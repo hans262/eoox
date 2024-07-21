@@ -1,14 +1,13 @@
 import { Controller, Get, Post } from "../src/index.js";
-import type { Request, Response, NextFunction } from "express";
+import type { Request, Response } from "express";
 
 @Controller("test")
 export class Test {
   // path -> /test
   @Get()
-  async get(req: Request, res: Response, next: NextFunction) {
-    // next('21312')
-    throw new Error("异步错误");
-    // res.json(req.query);
+  async get(req: Request, res: Response) {
+    // throw new Error("控制器错误");
+    res.json(req.query);
   }
 
   // path -> /test/abc

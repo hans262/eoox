@@ -34,8 +34,8 @@ import { Controller, Get } from "eoox";
 
 @Controller("test")
 export class Test {
-  // path -> /test/abc
-  @Get("abc")
+  // path -> /test
+  @Get()
   get(req, res) {
     res.json(req.query);
   }
@@ -54,5 +54,6 @@ Then use it in your express application.
 import { useEoox } from "eoox";
 const app = express();
 useEoox(app, "/api", [Test]);
+useEoox(app, "/admin", [Test2, Test3, ...]);
 // The second parameter represents your routing prefix.
 ```
