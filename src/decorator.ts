@@ -1,4 +1,5 @@
 import { metadatas, Method } from "./metadata.js";
+import type { Response, Request } from "express";
 
 export function Controller(cpath: string): ClassDecorator {
   return (constructor: any) => {
@@ -40,3 +41,23 @@ export const Post = createMethodDecorator("post");
 export const Put = createMethodDecorator("put");
 export const Delete = createMethodDecorator("delete");
 export const Patch = createMethodDecorator("patch");
+
+/**
+ * 拦截装饰器
+ * @param tf
+ */
+export function Off(
+  tf?: (req: Request, res: Response, next: () => void) => void
+): MethodDecorator {
+  return (target, propertyKey) => {
+    metadatas.find((m) => {
+      if (
+        m.constructorName === target.constructor.name &&
+        m.functionName === propertyKey
+      ) {
+        m.tf = tf;
+        return true;
+      }
+    });
+  };
+}

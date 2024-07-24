@@ -18,6 +18,7 @@ npm install eoox
 - @Put
 - @Delete
 - @Patch
+- @Off
 
 You need to configure in tsconfig.json:
 
@@ -51,9 +52,46 @@ export class Test {
 Then use it in your express application.
 
 ```ts
-import { useEoox } from "eoox";
+import { useController } from "eoox";
 const app = express();
-useEoox(app, "/api", [Test]);
-useEoox(app, "/admin", [Test2, Test3, ...]);
+useController(app, "/api", [Test]);
+useController(app, "/admin", [Test2, Test3, ...]);
 // The second parameter represents your routing prefix.
+```
+
+## Advanced
+
+- @Off
+
+拦截装饰器，用于校验当前路由的前置函数。
+
+```ts
+@Controller("test")
+export class Test {
+  @Off((req, res, next) => {
+    //在这里验证你的token
+    if (!token) {
+      return res.json({ code: 401, message: "请登录" });
+    }
+    next();
+  })
+  @Get("/a")
+  [randomfn()](req: Request, res: Response) {
+    res.json(req.query);
+  }
+}
+```
+
+- randomfn
+
+你可以使用随机的函数名，你不需要再为取名而烦恼，因为方法函数名不重要。
+
+```ts
+@Controller("test")
+export class Test {
+  @Get("/a")
+  [randomfn()](req: Request, res: Response) {
+    res.json(req.query);
+  }
+}
 ```

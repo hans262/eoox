@@ -1,13 +1,13 @@
 import express from "express";
-import { useEoox } from "../src/index.js";
+import { useController } from "../src/index.js";
 import { Test, Test2 } from "./controllers.js";
 
 const app = express();
 const PORT = 3000;
 
 app.use(express.json({ limit: "20mb" }));
-useEoox(app, "api", [Test]);
-useEoox(app, "admin", [Test2]);
+useController(app, "api", [Test]);
+useController(app, "admin", [Test2]);
 
 app.use(
   (

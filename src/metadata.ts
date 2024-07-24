@@ -16,6 +16,8 @@ export interface Metadata {
   functionName: string | symbol;
   /**控制器对象实例，挂装饰器才会有 */
   instance?: any;
+  /**拦截函数 */
+  tf?: (req: any, res: any, next: any) => void | Promise<void>;
 }
 
 /**
@@ -29,7 +31,7 @@ export const metadatas: Metadata[] = [];
  * @param prefix api前缀
  * @param controllers 控制器集合
  */
-export const useEoox = (
+export const useController = (
   app: Express,
   prefix: string,
   controllers: (new () => any)[]
@@ -39,16 +41,29 @@ export const useEoox = (
     for (const item of items) {
       if (item.instance && item.cpath) {
         const path = posix.join("/", prefix, item.cpath, item.mpath!);
-        // 为了支持自动收集中间件错误
+        // 自动收集中间件、异常
         app[item.method](path, async (req, res, next) => {
           try {
-            await item.instance[item.functionName].bind(item.instance)(
-              req,
-              res,
-              next
-            );
+            if (item.tf) {
+              await item.tf(req, res, async () => {
+                try {
+                  await item.instance[item.functionName].bind(item.instance)(
+                    req,
+                    res,
+                    next
+                  );
+                } catch (err) {
+                  next(err);
+                }
+              });
+            } else {
+              await item.instance[item.functionName].bind(item.instance)(
+                req,
+                res,
+                next
+              );
+            }
           } catch (err) {
-            //捕获异步或同步错误
             next(err);
           }
         });
@@ -56,3 +71,12 @@ export const useEoox = (
     }
   }
 };
+
+/**
+ * 生成唯一函数名
+ */
+export function randomfn() {
+  // const ext = Math.random().toString(32).substring(2, 16);
+  // const fn = "fn_" + Date.now() + "_" + ext;
+  return Symbol();
+}
