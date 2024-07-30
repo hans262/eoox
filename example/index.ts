@@ -16,7 +16,7 @@ app.use(
     res: express.Response,
     next: express.NextFunction
   ) => {
-    console.log(err);
+    console.error(err);
     res.status(500).send(`
       <h2>500 Error</h2>
       <p>${err}</p>
