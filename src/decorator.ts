@@ -1,5 +1,6 @@
+import { z } from "zod";
 import { metadatas, Method } from "./metadata.js";
-import type { Response, Request } from "express";
+import type { Response, Request, NextFunction } from "express";
 
 export function Controller(cpath: string): ClassDecorator {
   return (constructor: any) => {
@@ -42,22 +43,58 @@ export const Put = createMethodDecorator("put");
 export const Delete = createMethodDecorator("delete");
 export const Patch = createMethodDecorator("patch");
 
+type IMiddleware = (req: Request, res: Response, next: NextFunction) => any;
+
 /**
  * 拦截装饰器
  * @param tf
  */
-export function Off(
-  tf?: (req: Request, res: Response, next: () => void) => void
+export function Off(tf: IMiddleware): MethodDecorator {
+  return (_, __, descriptor: PropertyDescriptor) => {
+    const originalMethod = descriptor.value;
+    descriptor.value = async function (
+      req: Request,
+      res: Response,
+      next: NextFunction
+    ) {
+      await tf(req, res, async () => {
+        try {
+          await originalMethod.bind(this)(req, res, next);
+        } catch (err) {
+          next(err);
+        }
+      });
+    };
+    return descriptor;
+  };
+}
+
+/**
+ * zod验证装饰器
+ * @param schema
+ */
+export function Validate(
+  schema: z.ZodObject<any>,
+  requestPart: "body" | "query" | "params"
 ): MethodDecorator {
-  return (target, propertyKey) => {
-    metadatas.find((m) => {
-      if (
-        m.constructorName === target.constructor.name &&
-        m.functionName === propertyKey
-      ) {
-        m.tf = tf;
-        return true;
+  return (_, __, descriptor: PropertyDescriptor) => {
+    const originalMethod = descriptor.value;
+    descriptor.value = async function (
+      req: Request,
+      res: Response,
+      next: NextFunction
+    ) {
+      try {
+        schema.parse(req[requestPart]);
+        await originalMethod.bind(this)(req, res, next);
+      } catch (error: any) {
+        if (error instanceof z.ZodError) {
+          res.json({ code: 400, msg: "参数错误", errors: error.issues });
+        } else {
+          throw new Error(error);
+        }
       }
-    });
+    };
+    return descriptor;
   };
 }

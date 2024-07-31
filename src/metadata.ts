@@ -16,8 +16,6 @@ export interface Metadata {
   functionName: string | symbol;
   /**控制器对象实例，挂装饰器才会有 */
   instance?: any;
-  /**拦截函数 */
-  tf?: (req: any, res: any, next: any) => void | Promise<void>;
 }
 
 /**
@@ -44,25 +42,11 @@ export const useController = (
         // 自动收集中间件、异常
         app[item.method](path, async (req, res, next) => {
           try {
-            if (item.tf) {
-              await item.tf(req, res, async () => {
-                try {
-                  await item.instance[item.functionName].bind(item.instance)(
-                    req,
-                    res,
-                    next
-                  );
-                } catch (err) {
-                  next(err);
-                }
-              });
-            } else {
-              await item.instance[item.functionName].bind(item.instance)(
-                req,
-                res,
-                next
-              );
-            }
+            await item.instance[item.functionName].bind(item.instance)(
+              req,
+              res,
+              next
+            );
           } catch (err) {
             next(err);
           }
