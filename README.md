@@ -18,7 +18,7 @@ npm install eoox
 - @Put
 - @Delete
 - @Patch
-- @Off
+- @Before
 
 You need to configure in tsconfig.json:
 
@@ -61,14 +61,14 @@ useController(app, "/admin", [Test2, Test3, ...]);
 
 ## Advanced
 
-- @Off
+- @Intercept
 
 拦截装饰器，用于校验当前路由的前置函数。
 
 ```ts
 @Controller("test")
 export class Test {
-  @Off((req, res, next) => {
+  @Before((req, res, next) => {
     //在这里验证你的token
     if (!token) {
       return res.json({ code: 401, message: "请登录" });

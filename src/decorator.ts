@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { metadatas, Method } from "./metadata.js";
 import type { Response, Request, NextFunction } from "express";
 
@@ -49,7 +48,7 @@ type IMiddleware = (req: Request, res: Response, next: NextFunction) => any;
  * 拦截装饰器
  * @param tf
  */
-export function Off(tf: IMiddleware): MethodDecorator {
+export function Before(tf: IMiddleware): MethodDecorator {
   return (_, __, descriptor: PropertyDescriptor) => {
     const originalMethod = descriptor.value;
     descriptor.value = async function (
@@ -64,36 +63,6 @@ export function Off(tf: IMiddleware): MethodDecorator {
           next(err);
         }
       });
-    };
-    return descriptor;
-  };
-}
-
-/**
- * zod验证装饰器
- * @param schema
- */
-export function Validate(
-  schema: z.ZodObject<any>,
-  requestPart: "body" | "query" | "params"
-): MethodDecorator {
-  return (_, __, descriptor: PropertyDescriptor) => {
-    const originalMethod = descriptor.value;
-    descriptor.value = async function (
-      req: Request,
-      res: Response,
-      next: NextFunction
-    ) {
-      try {
-        schema.parse(req[requestPart]);
-        await originalMethod.bind(this)(req, res, next);
-      } catch (error: any) {
-        if (error instanceof z.ZodError) {
-          res.json({ code: 400, msg: "参数错误", errors: error.issues });
-        } else {
-          throw new Error(error);
-        }
-      }
     };
     return descriptor;
   };

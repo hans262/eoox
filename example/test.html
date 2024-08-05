@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>index</title>
+</head>
+
+<body>
+  <button id="btn">请求</button>
+  <script>
+    const btn = document.getElementById('btn')
+
+    btn.addEventListener('click', async (e) => {
+      const ret = await fetch('/api/test/post', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ phone: '2121.22'})
+      }).then(res => res.json())
+      console.log(ret)
+
+    })
+
+  </script>
+</body>
+
+</html>

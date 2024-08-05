@@ -9,6 +9,8 @@ app.use(express.json({ limit: "20mb" }));
 useController(app, "api", [Test]);
 useController(app, "admin", [Test2]);
 
+app.use(express.static("/Users/macbookair/Desktop/develop/eoox"));
+
 app.use(
   (
     err: Error,
@@ -16,7 +18,7 @@ app.use(
     res: express.Response,
     next: express.NextFunction
   ) => {
-    console.error(err);
+    // console.error(err);
     res.status(500).send(`
       <h2>500 Error</h2>
       <p>${err}</p>
