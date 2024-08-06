@@ -42,13 +42,14 @@ export const Put = createMethodDecorator("put");
 export const Delete = createMethodDecorator("delete");
 export const Patch = createMethodDecorator("patch");
 
-type IMiddleware = (req: Request, res: Response, next: NextFunction) => any;
+type Middleware = (req: Request, res: Response, next: NextFunction) => any;
 
 /**
- * 拦截装饰器
+ * 中间件装饰器
+ * 控制器方法
  * @param tf
  */
-export function Before(tf: IMiddleware): MethodDecorator {
+export function Use(tf: Middleware): MethodDecorator {
   return (_, __, descriptor: PropertyDescriptor) => {
     const originalMethod = descriptor.value;
     descriptor.value = async function (

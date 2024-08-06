@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 
-export type Ischema =
+export type Schema =
   | "string"
   | "string?"
   | "number"
@@ -8,7 +8,7 @@ export type Ischema =
   | "snumber" // number | 可转数字的字符串
   | "snumber?";
 
-//字符串最小长度
+//考虑空字符串的情况
 
 interface IError {
   path: string;
@@ -21,7 +21,7 @@ export const Body = createSchema("body");
 export const Param = createSchema("param");
 
 function createSchema(ip: "body" | "query" | "param") {
-  return (schema: { [key: string]: Ischema }): MethodDecorator =>
+  return (schema: { [key: string]: Schema }): MethodDecorator =>
     (_, __, descriptor: PropertyDescriptor) => {
       const originalMethod = descriptor.value;
       descriptor.value = async function (
@@ -37,7 +37,7 @@ function createSchema(ip: "body" | "query" | "param") {
           }
         }
 
-        if (errors.length) {
+        if (errors.length > 0) {
           return res.json({ code: 400, msg: "参数错误", errors });
         }
         await originalMethod.bind(this)(req, res, next);
@@ -46,7 +46,7 @@ function createSchema(ip: "body" | "query" | "param") {
     };
 }
 
-function is(key: string, sc: Ischema, value: any): IError | false {
+function is(key: string, sc: Schema, value: any): IError | false {
   if (sc === "string" && typeof value === "string") {
     return false;
   }

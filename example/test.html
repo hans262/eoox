@@ -15,10 +15,9 @@
       const ret = await fetch('/api/test/post', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ phone: '2121.22'})
+        body: JSON.stringify({ phone: '2121.22' })
       }).then(res => res.json())
       console.log(ret)
-
     })
 
   </script>

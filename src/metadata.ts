@@ -57,9 +57,9 @@ export const useController = (
 };
 
 /**
- * 生成唯一函数名
+ * symbol 函数名
  */
-export function randomfn() {
+export function sfn() {
   // const ext = Math.random().toString(32).substring(2, 16);
   // const fn = "fn_" + Date.now() + "_" + ext;
   return Symbol();

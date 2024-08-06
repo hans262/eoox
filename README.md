@@ -1,16 +1,16 @@
 # The Eoox
 
-The extension function of express makes your development easier.
+Express 的扩展功能，让你的开发变得更简单。
 
-Use decorator syntax to define your route, without the need to define route connections, and support Express's route parsing method.
+使用装饰器语法来定义路由，无需编写路由中间件，并支持 express 的路由命中规则。
 
-## Install
+## 安装
 
 ```sh
 npm install eoox
 ```
 
-## Decorator
+## 装饰器
 
 - @Controller
 - @Get
@@ -18,17 +18,17 @@ npm install eoox
 - @Put
 - @Delete
 - @Patch
-- @Before
+- @Use
 
-You need to configure in tsconfig.json:
+你需要配置你的 tsconfig.json 文件：
 
 ```json
 { "experimentalDecorators": true }
 ```
 
-## How to use
+## 怎么使用
 
-First, create your controller.
+首先，创建你的控制器。
 
 ```ts
 import { Controller, Get } from "eoox";
@@ -37,60 +37,63 @@ import { Controller, Get } from "eoox";
 export class Test {
   // path -> /test
   @Get()
-  get(req, res) {
+  get(req: express.Request, res: express.Response) {
     res.json(req.query);
   }
 
-  // path -> /test/abc/123
-  @Get("abc/:id")
+  // path -> /test/post/1234
+  @Get("post/:id")
   param(req, res) {
     res.json(req.params);
   }
 }
 ```
 
-Then use it in your express application.
+然后使用它在你的 express 应用中。
 
 ```ts
 import { useController } from "eoox";
+
 const app = express();
-useController(app, "/api", [Test]);
-useController(app, "/admin", [Test2, Test3, ...]);
-// The second parameter represents your routing prefix.
+useController(app, "api", [Test]);
+useController(app, "admin", [Test2, Test3, ...]);
+// 第二个参数是你的路由前缀。
 ```
 
-## Advanced
+## 高级用法
 
-- @Intercept
+- @Use
 
-拦截装饰器，用于校验当前路由的前置函数。
+中间件装饰器，用于在该方法前安装一个中间件，可用于权限校验、拦截等功能。
 
 ```ts
 @Controller("test")
 export class Test {
-  @Before((req, res, next) => {
-    //在这里验证你的token
-    if (!token) {
-      return res.json({ code: 401, message: "请登录" });
-    }
-    next();
-  })
+  @Use(handleAuth)
   @Get("/a")
-  [randomfn()](req: Request, res: Response) {
+  [sfn()](req: Request, res: Response) {
     res.json(req.query);
   }
 }
+
+const handleAuth = (req, res, next) => {
+  //在这里验证你的token
+  if (!token) {
+    return res.json({ code: 401, message: "请登录" });
+  }
+  next();
+};
 ```
 
-- randomfn
+- sfn
 
-你可以使用随机的函数名，你不需要再为取名而烦恼，因为方法函数名不重要。
+symbol 函数名，不需要再为取名而烦恼。
 
 ```ts
 @Controller("test")
 export class Test {
   @Get("/a")
-  [randomfn()](req: Request, res: Response) {
+  [sfn()](req: Request, res: Response) {
     res.json(req.query);
   }
 }
