@@ -25,7 +25,7 @@ export class Test {
   [sfn()](req: Request, res: Response) {
     // throw new Error("控制器错误");
     // console.log(this.a);
-    res.json(req.body);
+    res.json({ code: 200, msg: "ok" });
   }
 
   @Get("abc/:id")
