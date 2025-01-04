@@ -5,14 +5,12 @@ export type Schema =
   | "string?"
   | "number"
   | "number?"
-  | "snumber" // number | 可转数字的字符串
+  | "snumber" // 字符串数字 & 数字
   | "snumber?";
-
-//考虑空字符串的情况
 
 interface IError {
   path: string;
-  expect: string;
+  expect: Schema;
   have: string;
 }
 
@@ -31,14 +29,14 @@ function createSchema(ip: "body" | "query" | "param") {
       ) {
         const errors: IError[] = [];
         for (let sk in schema) {
-          let iis;
-          if ((iis = is(sk, schema[sk], req[ip][sk]))) {
-            errors.push(iis);
+          let [expect, value] = [schema[sk], req[ip][sk]];
+          const hit = hits[expect](value);
+          if (!hit) {
+            errors.push({ path: sk, expect, have: typeof value });
           }
         }
-
         if (errors.length > 0) {
-          return res.json({ code: 400, msg: "参数错误", errors });
+          return res.status(400).json({ code: 400, msg: "参数错误", errors });
         }
         await originalMethod.bind(this)(req, res, next);
       };
@@ -46,46 +44,18 @@ function createSchema(ip: "body" | "query" | "param") {
     };
 }
 
-function is(key: string, sc: Schema, value: any): IError | false {
-  if (sc === "string" && typeof value === "string") {
-    return false;
-  }
-
-  if (sc === "string?") {
-    if (value === undefined) {
-      return false;
-    } else if (typeof value === "string") {
-      return false;
-    }
-  }
-
-  if (sc === "number" && typeof value === "number") {
-    return false;
-  }
-
-  if (sc === "number?") {
-    if (value === undefined) {
-      return false;
-    } else if (typeof value === "number") {
-      return false;
-    }
-  }
-
-  if (sc === "snumber") {
-    if (typeof value === "number") {
-      return false;
-    } else if (typeof value === "string" && !isNaN(Number(value))) {
-      return false;
-    }
-  }
-
-  if (sc === "snumber?") {
-    if (value === undefined || typeof value === "number") {
-      return false;
-    } else if (typeof value === "string" && !isNaN(Number(value))) {
-      return false;
-    }
-  }
-
-  return { path: key, expect: sc, have: typeof value };
-}
+const hits: { [key in Schema]: (val: any) => boolean } = {
+  string: (val) => typeof val === "string",
+  "string?": (val) => {
+    return val === undefined || typeof val === "string";
+  },
+  number: (val) => typeof val === "number",
+  "number?": (val) => val === undefined || typeof val === "number",
+  snumber: (val) =>
+    typeof val === "number" ||
+    (typeof val === "string" && val.length > 0 && !Number.isNaN(Number(val))),
+  "snumber?": (val) =>
+    val === undefined ||
+    typeof val === "number" ||
+    (typeof val === "string" && val.length > 0 && !Number.isNaN(Number(val))),
+};
