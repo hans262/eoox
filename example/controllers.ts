@@ -19,12 +19,17 @@ export class Test {
 
   @Post("post")
   @Body({
-    // name: 'string?',
-    phone: "snumber?",
+    name: "number[]?",
+    phone: /abc/,
+    arr: {
+      validate: (val) => {
+        // console.log(val)
+        return val.length === 2;
+      },
+      msg: "数组长度必须是2",
+    },
   })
   [sfn()](req: Request, res: Response) {
-    // throw new Error("控制器错误");
-    // console.log(this.a);
     res.json({ code: 200, msg: "ok" });
   }
 
