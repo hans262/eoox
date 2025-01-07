@@ -1,5 +1,8 @@
 import type { NextFunction, Request, Response } from "express";
 
+//提供显示转换功能
+// 即可以把一个字符串转换为number
+
 export type Schema =
   | "string"
   | "string?"

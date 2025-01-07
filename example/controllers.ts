@@ -20,11 +20,11 @@ export class Test {
   @Post("post")
   @Body({
     name: "number[]?",
-    phone: /abc/,
+    phone: { type: /abc/, msg: "必须是abc" },
     arr: {
       validate: (val) => {
-        // console.log(val)
-        return val.length === 2;
+        console.log(val);
+        return Array.isArray(val) && val.length === 2;
       },
       msg: "数组长度必须是2",
     },
