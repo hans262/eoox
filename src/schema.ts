@@ -1,8 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
 
-//提供显示转换功能
-// 即可以把一个字符串转换为number
-
 export type Schema =
   | "string"
   | "string?"
@@ -35,9 +32,9 @@ type Rule =
 
 export const Query = createSchema("query");
 export const Body = createSchema("body");
-export const Param = createSchema("param");
+export const Param = createSchema("params");
 
-function createSchema(source: "body" | "query" | "param") {
+function createSchema(source: "body" | "query" | "params") {
   return (opt: { [key: string]: Rule }): MethodDecorator =>
     (_, __, descriptor: PropertyDescriptor) => {
       const originalMethod = descriptor.value;

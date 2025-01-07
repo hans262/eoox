@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Post, Query, sfn, Use } from "../src/index.js";
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  sfn,
+  Use,
+} from "../src/index.js";
 import type { Request, Response } from "express";
 
 @Controller("test")
@@ -17,18 +26,9 @@ export class Test {
     res.json(req.query);
   }
 
-  @Post("post")
-  @Body({
-    name: "number[]?",
-    phone: { type: /abc/, msg: "必须是abc" },
-    arr: {
-      validate: (val) => {
-        console.log(val);
-        return Array.isArray(val) && val.length === 2;
-      },
-      msg: "数组长度必须是2",
-    },
-  })
+  @Post("create/:id")
+  @Body({ name: "string", age: { type: "number", msg: "必须是数字" } })
+  @Param({ id: "snumber" })
   [sfn()](req: Request, res: Response) {
     res.json({ code: 200, msg: "ok" });
   }

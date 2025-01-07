@@ -19,10 +19,8 @@ app.use(
     next: express.NextFunction
   ) => {
     // console.error(err);
-    res.status(500).send(`
-      <h2>500 Error</h2>
-      <p>${err}</p>
-    `);
+    console.error(err);
+    res.status(500).json({ code: 500, msg: err.message });
   }
 );
 

@@ -1,10 +1,10 @@
 # The Eoox
 
-Express 的扩展功能，让你的开发变得更简单。
+`Express` 的扩展功能，让你的开发变得更简单，一切为了快乐工作。
 
-使用装饰器语法来定义路由，无需编写路由中间件，并支持 express 的路由命中规则。
-
-还包含了简单的参数校验功能，总之一切为了开发便利。
+- 使用装饰器语法来定义路由，采用`express`的路由命中规则；
+- 使用装饰器语法来校验参数类型，编写好规则后，将自动验证字段类型；
+- 提供额外功能性装饰器。
 
 ## 安装
 
@@ -14,14 +14,10 @@ npm install eoox
 
 ## 装饰器
 
-- @Controller
-- @Get
-- @Post
-- @Put
-- @Delete
-- @Patch
-- @Use
-- @Body | @Query | @Param
+- `@Controller`
+- `@Get | @Post | @Put | @Delete | @Patch`
+- `@Body | @Query | @Param`
+- `@Use`
 
 你需要配置你的 tsconfig.json 文件：
 
@@ -37,7 +33,7 @@ npm install eoox
 import { Controller, Get, Post } from "eoox";
 
 @Controller("test")
-export class Test {
+class Test {
   // GET: /test
   @Get()
   findAll(req: express.Request, res: express.Response) {
@@ -46,9 +42,7 @@ export class Test {
 
   // POST: /test/create/1234
   @Post("create/:id")
-  create(req, res) {
-    res.json({ code: 200, msg: "ok" });
-  }
+  create(req, res) {}
 }
 ```
 
@@ -70,29 +64,23 @@ useController(app, "admin", [Other, Other2, ...]);
 快速校验的你的参数，包含 `body|query|param` 中的参数。
 
 ```ts
-@Controller("test")
-export class Test {
-  @Post("create")
-  @Body({
-    name: "string",
-    phone: /^\d{11}$/,
-    arr: {
-      validate: (val) => {
-        return Array.isArray(val) && val.length === 2;
-      },
-      msg: "数组长度必须是2",
-    },
-  })
-  create(req, res) {
-    res.json({ code: 200, msg: "ok" });
-  }
-}
+@Post("create/:id")
+@Body({
+  name: "string",
+  phone: { type: /^\d{11}$/, msg: "手机号有误" }
+  tags: {
+    validate: (val) => Array.isArray(val) && val.length === 2,
+    msg: "长度必须是2",
+  },
+})
+@Param({ id: "snumber" })
+create(req, res) { }
 ```
 
-支持的校验类型，和传参方式，`?`代表可选。
+支持的验证类型和传参方式，`?`代表可选。
 
 ```ts
-export type Schema =
+type Schema =
   | "string"
   | "string?"
   | "number"
@@ -118,23 +106,18 @@ type Rule =
 
 - `@Use`
 
-中间件装饰器，用于在该方法前安装一个中间件，可用于权限校验、拦截等功能。
+中间件装饰器，他的功能类似于方法级别的中间件，执行的顺序在该方法之前，可用于权限校验、拦截等。
 
-让控制器处理函数拥有`AOP`切面编程的能力。
+另一种说法是类似于`Spring: AOP`中的功能，让控制器处理函数拥有面向切面编程的能力。
 
 ```ts
-@Controller("test")
-export class Test {
-  @Use(async (req, res, next) => {
-    console.log("before");
-    await next();
-    console.log("after");
-  })
-  @Get("/a")
-  [sfn()](req: Request, res: Response) {
-    res.json(req.query);
-  }
-}
+@Use(async (req, res, next) => {
+  console.log("before");
+  await next();
+  console.log("after");
+})
+@Get()
+findAll(req, res) { }
 ```
 
 - `sfn`
@@ -142,11 +125,11 @@ export class Test {
 `symbol`函数名，不再为方法取名而烦恼。
 
 ```ts
+import { sfn } from "eoox";
+
 @Controller("test")
-export class Test {
-  @Get("/a")
-  [sfn()](req: Request, res: Response) {
-    res.json(req.query);
-  }
+class Test {
+  @Post("/create/:id")
+  [sfn()](req, res) {}
 }
 ```
