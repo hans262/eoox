@@ -5,6 +5,9 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "license": "MIT",
+  "keywords": [
+    "express"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/hans262/eoox.git"
