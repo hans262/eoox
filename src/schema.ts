@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 
-export type Schema =
+type Schema =
   | "string"
   | "string?"
   | "number"
@@ -13,22 +13,19 @@ export type Schema =
   | "string[]?"
   | "array"
   | "array?"
-  | RegExp;
+  | RegExp
+  | SchemaFn;
 
-interface IError {
+type SchemaFn = (val: any, req?: Request) => boolean;
+type SchemaOpt = { type: Schema; msg?: string };
+type Rule = Schema | SchemaOpt;
+
+interface SError {
   path: string;
   expect: string;
   have: string;
   msg?: string;
 }
-
-type Rule =
-  | Schema
-  | {
-      type?: Schema;
-      msg?: string;
-      validate?: (val: any, req?: Request) => boolean;
-    };
 
 export const Query = createSchema("query");
 export const Body = createSchema("body");
@@ -43,37 +40,36 @@ function createSchema(source: "body" | "query" | "params") {
         res: Response,
         next: NextFunction
       ) {
-        const errors: IError[] = [];
+        const errors: SError[] = [];
         for (let key in opt) {
           const [rule, value] = [opt[key], req[source][key]];
-
-          const expect =
+          const schema =
             rule instanceof RegExp
               ? rule
-              : typeof rule === "object"
+              : rule instanceof Function
+              ? rule
+              : rule instanceof Object
               ? rule.type
               : rule;
 
-          const msg =
-            typeof rule === "object" && "msg" in rule ? rule.msg : undefined;
-
           let hit = true;
-          if (expect instanceof RegExp) {
-            hit = expect.test(value);
-          } else if (expect) {
-            hit = hits[expect](value);
+          if (schema instanceof RegExp) {
+            hit = schema.test(value);
+          } else if (schema instanceof Function) {
+            hit = schema.bind(this)(value, req);
           } else {
-            if (typeof rule === "object" && "validate" in rule) {
-              hit = rule.validate!(value, req);
-            }
+            hit = hits[schema](value);
           }
 
           if (!hit) {
             errors.push({
               path: source + "." + key,
-              expect: expect?.toString() || "custom",
+              expect: schema.toString(),
               have: value === undefined ? "undefined" : value,
-              msg,
+              msg:
+                typeof rule === "object" && "msg" in rule
+                  ? rule.msg
+                  : undefined,
             });
           }
         }
@@ -87,7 +83,7 @@ function createSchema(source: "body" | "query" | "params") {
 }
 
 const hits: {
-  [key in Exclude<Schema, RegExp>]: (val: any) => boolean;
+  [key in Exclude<Schema, RegExp | SchemaFn>]: (val: any) => boolean;
 } = {
   string: (val) => typeof val === "string",
   "string?": (val) => val === undefined || hits.string(val),

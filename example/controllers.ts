@@ -10,6 +10,14 @@ import {
 } from "../src/index.js";
 import type { Request, Response } from "express";
 
+// let opt: any = function (val: any) {
+//   return true;
+// };
+// opt = (val: any) => true;
+// opt = /abc/;
+// opt = { type: "dwq" };
+// console.log(typeof opt);
+
 @Controller("test")
 export class Test {
   a = 2;
@@ -27,15 +35,29 @@ export class Test {
   }
 
   @Post("create/:id")
-  @Body({ name: "string", age: { type: "number", msg: "必须是数字" } })
+  @Body({
+    name: "string",
+    // tags: {
+    //   type: function ( val, req)  {
+    //     // console.log(this.a);
+    //     return Array.isArray(val) && val.length === 2;
+    //   },
+    //   msg:'长度必须是2'
+    // },
+    tag2: function (val, req) {
+      console.log(req);
+      return Array.isArray(val) && val.length === 2;
+    },
+  })
   @Param({ id: "snumber" })
   [sfn()](req: Request, res: Response) {
     res.json({ code: 200, msg: "ok" });
   }
 
-  @Get("abc/:id")
+  // @Body({ id: { type: (val, req) => true, msg: "长度必须是2" } })
+  @Get("find/:id")
   [sfn()](req: Request, res: Response) {
-    res.json(req.params);
+    res.json({ code: 200, msg: "ok" });
   }
 }
 

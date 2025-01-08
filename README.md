@@ -4,6 +4,7 @@
 
 - 使用装饰器语法来定义路由，采用`express`的路由命中规则；
 - 使用装饰器语法来校验参数，编写好规则后，将自动验证字段类型；
+- 自动收集`Controller`的顶层异常，无需手动捕获。
 - 提供额外的功能性装饰器。
 
 ## 安装
@@ -69,12 +70,12 @@ useController(app, "admin", [Other, Other2, ...]);
   name: "string",
   phone: { type: /^\d{11}$/, msg: "手机号有误" }
   tags: {
-    validate: (val) => Array.isArray(val) && val.length === 2,
+    type: (val) => Array.isArray(val) && val.length === 2,
     msg: "长度必须是2",
   },
 })
 @Param({ id: "snumber" })
-create(req, res) { }
+create(req, res) {}
 ```
 
 支持的验证类型和传参方式，`?`代表可选。
@@ -93,15 +94,12 @@ type Schema =
   | "string[]?"
   | "array"
   | "array?"
-  | RegExp;
+  | RegExp
+  | SchemaFn;
 
-type Rule =
-  | Schema
-  | {
-      type?: Schema;
-      msg?: string;
-      validate?: (val: any, req?: Request) => boolean;
-    };
+type SchemaFn = (val: any, req?: Request) => boolean;
+type SchemaOpt = { type: Schema; msg?: string };
+type Rule = Schema | SchemaOpt;
 ```
 
 - `@Use`
@@ -117,7 +115,7 @@ type Rule =
   console.log("after");
 })
 @Get()
-findAll(req, res) { }
+findAll(req, res) {}
 ```
 
 - `sfn`
@@ -127,9 +125,29 @@ findAll(req, res) { }
 ```ts
 import { sfn } from "eoox";
 
-@Controller("test")
-class Test {
-  @Post("/create/:id")
-  [sfn()](req, res) {}
+@Post("/create/:id")
+[sfn()](req, res) {}
+```
+
+- 全局异常收集
+
+自动收集`Controller`内顶层异常，无需手动捕获。你可以在`express`的异常中间件中接收到。
+
+```ts
+@Post("create/:id")
+create(req, res) {
+  throw new Error("some err");
 }
+// -----------------------------
+app.use(
+  (
+    err: Error,
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction
+  ) => {
+    console.error(err);
+    res.status(500).json({ code: 500, msg: err.message });
+  }
+);
 ```
