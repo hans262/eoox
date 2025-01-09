@@ -10,14 +10,6 @@ import {
 } from "../src/index.js";
 import type { Request, Response } from "express";
 
-// let opt: any = function (val: any) {
-//   return true;
-// };
-// opt = (val: any) => true;
-// opt = /abc/;
-// opt = { type: "dwq" };
-// console.log(typeof opt);
-
 @Controller("test")
 export class Test {
   a = 2;
@@ -44,10 +36,10 @@ export class Test {
     //   },
     //   msg:'长度必须是2'
     // },
-    tag2: function (val, req) {
-      console.log(req);
-      return Array.isArray(val) && val.length === 2;
-    },
+    abc: /^(abc|def)$/,
+    // tag2: function (val, req) {
+    //   return Array.isArray(val) && val.length === 2;
+    // },
   })
   @Param({ id: "snumber" })
   [sfn()](req: Request, res: Response) {

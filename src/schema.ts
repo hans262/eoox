@@ -5,7 +5,7 @@ type Schema =
   | "string?"
   | "number"
   | "number?"
-  | "snumber" // 字符串数字 & 数字
+  | "snumber" // '123' | number
   | "snumber?"
   | "number[]"
   | "number[]?"
@@ -13,6 +13,10 @@ type Schema =
   | "string[]?"
   | "array"
   | "array?"
+  | "boolean"
+  | "boolean?"
+  | "sboolean" // 'true' | 'false' | boolean
+  | "sboolean?"
   | RegExp
   | SchemaFn;
 
@@ -54,7 +58,7 @@ function createSchema(source: "body" | "query" | "params") {
 
           let hit = true;
           if (schema instanceof RegExp) {
-            hit = schema.test(value);
+            hit = value === undefined ? false : schema.test(value);
           } else if (schema instanceof Function) {
             hit = schema.bind(this)(value, req);
           } else {
@@ -99,4 +103,9 @@ const hits: {
   "string[]?": (val) => val === undefined || hits["string[]"](val),
   array: (val) => Array.isArray(val),
   "array?": (val) => val === undefined || hits.array(val),
+  boolean: (val) => typeof val === "boolean",
+  "boolean?": (val) => val === undefined || hits.boolean(val),
+  sboolean: (val) =>
+    val === "true" || val === "false" || typeof val === "boolean",
+  "sboolean?": (val) => val === undefined || hits.sboolean(val),
 };

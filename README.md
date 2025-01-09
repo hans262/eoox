@@ -86,7 +86,7 @@ type Schema =
   | "string?"
   | "number"
   | "number?"
-  | "snumber" // 字符串数字 & 数字
+  | "snumber" // '123' | number
   | "snumber?"
   | "number[]"
   | "number[]?"
@@ -94,6 +94,10 @@ type Schema =
   | "string[]?"
   | "array"
   | "array?"
+  | "boolean"
+  | "boolean?"
+  | "sboolean" // 'true' | 'false' | boolean
+  | "sboolean?"
   | RegExp
   | SchemaFn;
 
@@ -139,13 +143,7 @@ create(req, res) {
   throw new Error("some err");
 }
 // -----------------------------
-app.use(
-  (
-    err: Error,
-    req: express.Request,
-    res: express.Response,
-    next: express.NextFunction
-  ) => {
+app.use((err, req, res, next) => {
     console.error(err);
     res.status(500).json({ code: 500, msg: err.message });
   }
