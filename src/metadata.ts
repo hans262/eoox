@@ -39,7 +39,7 @@ export const useController = (
     for (const item of items) {
       if (item.instance && item.cpath) {
         const path = posix.join("/", prefix, item.cpath, item.mpath!);
-        // 自动收集中间件、异常
+        // 自动收集中间件异常 express v5已经包含该功能
         app[item.method](path, async (req, res, next) => {
           try {
             await item.instance[item.functionName].bind(item.instance)(

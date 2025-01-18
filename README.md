@@ -73,37 +73,41 @@ useController(app, "admin", [Other, Other2, ...]);
     type: (val) => Array.isArray(val) && val.length === 2,
     msg: "长度必须是2",
   },
+  page: [{ type: "number", optional: true, defaultValue: 1 }],
+  description: [{ type: "string" max: 500 }],
+  status: [{ type: ['start', 'stop'], optional: true }],
+  power: [ 10, 50, 100 ]
 })
 @Param({ id: "snumber" })
 create(req, res) {}
 ```
 
-支持的验证类型和传参方式，`?`代表可选。
+支持的验证类型和传参方式。
 
 ```ts
 type Schema =
   | "string"
-  | "string?"
   | "number"
-  | "number?"
   | "snumber" // '123' | number
-  | "snumber?"
   | "number[]"
-  | "number[]?"
   | "string[]"
-  | "string[]?"
   | "array"
-  | "array?"
   | "boolean"
-  | "boolean?"
   | "sboolean" // 'true' | 'false' | boolean
-  | "sboolean?"
   | RegExp
-  | SchemaFn;
+  | SchemaFn
+  | SchemaEnum;
 
 type SchemaFn = (val: any, req?: Request) => boolean;
-type SchemaOpt = { type: Schema; msg?: string };
-type Rule = Schema | SchemaOpt;
+type SchemaEnum = (string | number)[];
+interface Rule {
+  type: Schema;
+  msg?: string;
+  optional?: boolean;
+  min?: number;
+  max?: number; // string:length | number:size
+  defaultValue?: any;
+}
 ```
 
 - `@Use`

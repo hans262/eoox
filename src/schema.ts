@@ -2,31 +2,35 @@ import type { NextFunction, Request, Response } from "express";
 
 type Schema =
   | "string"
-  | "string?"
   | "number"
-  | "number?"
   | "snumber" // '123' | number
-  | "snumber?"
   | "number[]"
-  | "number[]?"
   | "string[]"
-  | "string[]?"
   | "array"
-  | "array?"
   | "boolean"
-  | "boolean?"
   | "sboolean" // 'true' | 'false' | boolean
-  | "sboolean?"
   | RegExp
-  | SchemaFn;
+  | SchemaFn
+  | SchemaEnum;
 
 type SchemaFn = (val: any, req?: Request) => boolean;
-type SchemaOpt = { type: Schema; msg?: string };
-type Rule = Schema | SchemaOpt;
+type SchemaEnum = (string | number)[];
+interface Rule {
+  type: Schema;
+  msg?: string;
+  optional?: boolean;
+  min?: number;
+  max?: number; // string:length | number:size
+  defaultValue?: any;
+}
 
-interface SError {
+interface IError {
   path: string;
-  expect: string;
+  expect: {
+    type: string | any[];
+    min?: number;
+    max?: number;
+  };
   have: string;
   msg?: string;
 }
@@ -36,7 +40,7 @@ export const Body = createSchema("body");
 export const Param = createSchema("params");
 
 function createSchema(source: "body" | "query" | "params") {
-  return (opt: { [key: string]: Rule }): MethodDecorator =>
+  return (opt: { [key: string]: Rule | Schema }): MethodDecorator =>
     (_, __, descriptor: PropertyDescriptor) => {
       const originalMethod = descriptor.value;
       descriptor.value = async function (
@@ -44,36 +48,50 @@ function createSchema(source: "body" | "query" | "params") {
         res: Response,
         next: NextFunction
       ) {
-        const errors: SError[] = [];
+        const errors: IError[] = [];
         for (let key in opt) {
           const [rule, value] = [opt[key], req[source][key]];
-          const schema =
+          const _rule =
             rule instanceof RegExp
-              ? rule
+              ? { type: rule }
               : rule instanceof Function
-              ? rule
+              ? { type: rule }
+              : rule instanceof Array
+              ? { type: rule }
               : rule instanceof Object
-              ? rule.type
-              : rule;
+              ? rule
+              : { type: rule };
 
+          const { type: schema, optional, msg, defaultValue } = _rule;
           let hit = true;
-          if (schema instanceof RegExp) {
+          const expect: IError["expect"] = { type: schema.toString() };
+
+          if (optional && value === undefined) {
+            //处理可选
+            hit = true;
+            if (defaultValue !== undefined) {
+              req[source][key] = defaultValue;
+            }
+          } else if (schema instanceof Array) {
+            //处理枚举
+            hit = schema.includes(value);
+            expect.type = schema;
+          } else if (schema instanceof RegExp) {
             hit = value === undefined ? false : schema.test(value);
           } else if (schema instanceof Function) {
             hit = schema.bind(this)(value, req);
           } else {
-            hit = hits[schema](value);
+            hit = hits[schema](value, _rule);
           }
 
           if (!hit) {
+            typeof _rule.min === "number" && (expect.min = _rule.min);
+            typeof _rule.max === "number" && (expect.max = _rule.max);
             errors.push({
               path: source + "." + key,
-              expect: schema.toString(),
+              expect,
               have: value === undefined ? "undefined" : value,
-              msg:
-                typeof rule === "object" && "msg" in rule
-                  ? rule.msg
-                  : undefined,
+              msg,
             });
           }
         }
@@ -87,25 +105,44 @@ function createSchema(source: "body" | "query" | "params") {
 }
 
 const hits: {
-  [key in Exclude<Schema, RegExp | SchemaFn>]: (val: any) => boolean;
+  [key in Exclude<Schema, RegExp | SchemaFn | SchemaEnum>]: (
+    val: any,
+    rule: Rule
+  ) => boolean;
 } = {
-  string: (val) => typeof val === "string",
-  "string?": (val) => val === undefined || hits.string(val),
-  number: (val) => typeof val === "number",
-  "number?": (val) => val === undefined || hits.number(val),
+  string: (val, rule) => {
+    if (typeof val === "string") {
+      if (typeof rule.max === "number" && val.length > rule.max) {
+        return false;
+      }
+      if (typeof rule.min === "number" && val.length < rule.min) {
+        return false;
+      }
+      return true;
+    }
+    return false;
+  },
+  number: (val, rule) => {
+    if (typeof val === "number") {
+      if (typeof rule.max === "number" && val > rule.max) {
+        return false;
+      }
+      if (typeof rule.min === "number" && val < rule.min) {
+        return false;
+      }
+      return true;
+    }
+    return false;
+  },
   snumber: (val) =>
     typeof val === "number" ||
     (typeof val === "string" && val.length > 0 && !Number.isNaN(Number(val))),
-  "snumber?": (val) => val === undefined || hits.snumber(val),
-  "number[]": (val) => Array.isArray(val) && val.every((v) => hits.number(v)),
-  "number[]?": (val) => val === undefined || hits["number[]"](val),
-  "string[]": (val) => Array.isArray(val) && val.every((v) => hits.string(v)),
-  "string[]?": (val) => val === undefined || hits["string[]"](val),
+  "number[]": (val) =>
+    Array.isArray(val) && val.every((v) => typeof val === "number"),
+  "string[]": (val) =>
+    Array.isArray(val) && val.every((v) => typeof val === "string"),
   array: (val) => Array.isArray(val),
-  "array?": (val) => val === undefined || hits.array(val),
   boolean: (val) => typeof val === "boolean",
-  "boolean?": (val) => val === undefined || hits.boolean(val),
   sboolean: (val) =>
     val === "true" || val === "false" || typeof val === "boolean",
-  "sboolean?": (val) => val === undefined || hits.sboolean(val),
 };
