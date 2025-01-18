@@ -35,7 +35,7 @@ export class Test {
       },
       optional: true,
     },
-    age: { type: ["abc", "def"] }
+    age: { type: ["abc", "def"] },
   })
   @Param({ id: "snumber" })
   @Post("create/:id")

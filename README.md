@@ -68,15 +68,15 @@ useController(app, "admin", [Other, Other2, ...]);
 @Post("create/:id")
 @Body({
   name: "string",
-  phone: { type: /^\d{11}$/, msg: "手机号有误" }
+  phone: { type: /^\d{11}$/, msg: "手机号有误" },
   tags: {
     type: (val) => Array.isArray(val) && val.length === 2,
     msg: "长度必须是2",
   },
-  page: [{ type: "number", optional: true, defaultValue: 1 }],
-  description: [{ type: "string" max: 500 }],
-  status: [{ type: ['start', 'stop'], optional: true }],
-  power: [ 10, 50, 100 ]
+  page: { type: "number", optional: true, defaultValue: 1 },
+  description: { type: "string", max: 500 },
+  status: { type: ["start", "stop"], optional: true },
+  power: [10, 50, 100],
 })
 @Param({ id: "snumber" })
 create(req, res) {}
