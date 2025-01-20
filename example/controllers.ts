@@ -35,7 +35,8 @@ export class Test {
       },
       optional: true,
     },
-    age: { type: ["abc", "def"] },
+    // age: { type: ["abc", "def"] },
+    ids: { type: "number[]", optional: true },
   })
   @Param({ id: "snumber" })
   @Post("create/:id")
@@ -58,6 +59,18 @@ export class Test2 {
     res.json(req.params);
   }
 
+  @Body({
+    name: "string",
+    phone: { type: /^\d{11}$/, msg: "手机号有误" },
+    tags: {
+      type: (val) => Array.isArray(val) && val.length === 2,
+      msg: "长度必须是2",
+    },
+    page: { type: "number", optional: true, defaultValue: 1 },
+    description: { type: "string", max: 500 },
+    status: { type: ["start", "stop"], optional: true },
+    power: [10, 50, 100],
+  })
   @Post("abc/:id")
   [sfn()](req: Request, res: Response) {
     res.json(req.params);

@@ -3,6 +3,21 @@
 - 熟悉多线程
 - 支持其他框架 koa Fastify
 
+
+- defaultValue 默认可选，不需要单独传递可选
+
+- 支持 object
+// address: {
+//   type: 'object',
+//   optional: true,
+//   fields: {
+//     street: { type: 'string', optional: true },
+//     city: { type: 'string', optional: true },
+//     zip: { type: 'string', optional: true, len: 8, msg: 'invalid zip' },
+//   },
+
+
+
 ## 已完成
 - controller级别的use函数
 - 支持默认值

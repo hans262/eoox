@@ -85,7 +85,7 @@ create(req, res) {}
 支持的验证类型和传参方式。
 
 ```ts
-type Schema =
+type Rule =
   | "string"
   | "number"
   | "snumber" // '123' | number
@@ -95,19 +95,18 @@ type Schema =
   | "boolean"
   | "sboolean" // 'true' | 'false' | boolean
   | RegExp
-  | SchemaFn
-  | SchemaEnum;
+  | ((val: any, req?: Request) => boolean) // custom validate
+  | (string | number)[]; // enum tuple
 
-type SchemaFn = (val: any, req?: Request) => boolean;
-type SchemaEnum = (string | number)[];
-interface Rule {
-  type: Schema;
+interface Schema {
+  type: Rule;
   msg?: string;
   optional?: boolean;
   min?: number;
   max?: number; // string:length | number:size
   defaultValue?: any;
 }
+type Source = Rule | Schema;
 ```
 
 - `@Use`
