@@ -21,7 +21,7 @@ interface Schema {
   max?: number; // string:length | number:size
   defaultValue?: any;
 }
-type Source = Rule | Schema;
+type Source = Schema | Rule;
 
 interface IError {
   path: string;
@@ -38,7 +38,7 @@ export const Query = createSchema("query");
 export const Body = createSchema("body");
 export const Param = createSchema("params");
 
-function createSchema(role: "body" | "query" | "params") {
+function createSchema(mode: "body" | "query" | "params") {
   return (opt: { [key: string]: Source }): MethodDecorator =>
     (_, __, descriptor: PropertyDescriptor) => {
       const originalMethod = descriptor.value;
@@ -49,7 +49,7 @@ function createSchema(role: "body" | "query" | "params") {
       ) {
         const errors: IError[] = [];
         for (let key in opt) {
-          const [source, value] = [opt[key], req[role][key]];
+          const [source, value] = [opt[key], req[mode][key]];
           const schema =
             source instanceof RegExp
               ? { type: source }
@@ -65,11 +65,14 @@ function createSchema(role: "body" | "query" | "params") {
           let hit = true;
           const expect: IError["expect"] = { type: type.toString() };
 
-          if (optional && value === undefined) {
+          if (
+            value === undefined &&
+            (optional === true || defaultValue !== undefined)
+          ) {
             //处理可选
             hit = true;
             if (defaultValue !== undefined) {
-              req[role][key] = defaultValue;
+              req[mode][key] = defaultValue;
             }
           } else if (type instanceof Array) {
             //处理枚举
@@ -87,7 +90,7 @@ function createSchema(role: "body" | "query" | "params") {
             typeof schema.min === "number" && (expect.min = schema.min);
             typeof schema.max === "number" && (expect.max = schema.max);
             errors.push({
-              path: source + "." + key,
+              path: mode + "." + key,
               expect,
               have: value === undefined ? "undefined" : value,
               msg,

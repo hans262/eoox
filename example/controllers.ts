@@ -35,8 +35,8 @@ export class Test {
       },
       optional: true,
     },
-    // age: { type: ["abc", "def"] },
-    ids: { type: "number[]", optional: true },
+    age: { type: ["abc", "def"], optional: true , defaultValue: "wqwqw"},
+    // ids: { type: "number[]", optional: true },
   })
   @Param({ id: "snumber" })
   @Post("create/:id")

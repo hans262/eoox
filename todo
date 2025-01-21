@@ -3,9 +3,6 @@
 - 熟悉多线程
 - 支持其他框架 koa Fastify
 
-
-- defaultValue 默认可选，不需要单独传递可选
-
 - 支持 object
 // address: {
 //   type: 'object',
@@ -16,8 +13,6 @@
 //     zip: { type: 'string', optional: true, len: 8, msg: 'invalid zip' },
 //   },
 
-
-
 ## 已完成
 - controller级别的use函数
 - 支持默认值
@@ -27,3 +22,4 @@
 - 支持可选
 - 支持正确的预期字段
 - 装饰器的执行顺序是从上到下
+- 配置了defaultValue，不需要再配置optional

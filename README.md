@@ -73,7 +73,7 @@ useController(app, "admin", [Other, Other2, ...]);
     type: (val) => Array.isArray(val) && val.length === 2,
     msg: "长度必须是2",
   },
-  page: { type: "number", optional: true, defaultValue: 1 },
+  page: { type: "number", defaultValue: 1 },
   description: { type: "string", max: 500 },
   status: { type: ["start", "stop"], optional: true },
   power: [10, 50, 100],
