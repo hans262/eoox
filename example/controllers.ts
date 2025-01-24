@@ -29,14 +29,21 @@ export class Test {
   }
 
   @Body({
-    name: {
-      type: (val) => {
-        return val.length > 3;
-      },
-      optional: true,
-    },
-    age: { type: ["abc", "def"], optional: true , defaultValue: "wqwqw"},
-    // ids: { type: "number[]", optional: true },
+    name: { type: "snumber", optional: true },
+    // user: {
+    //   type: "object",
+    //   defaultValue: { id: 2 },
+    //   fields: {
+    //     id: { type: "number", defaultValue: 1 },
+    //     post: {
+    //       type: "object",
+    //       optional: true,
+    //       fields: {
+    //         id: { type: "number", defaultValue: 23 },
+    //       },
+    //     },
+    //   },
+    // },
   })
   @Param({ id: "snumber" })
   @Post("create/:id")
@@ -61,6 +68,7 @@ export class Test2 {
 
   @Body({
     name: "string",
+    status: ["start", "stop"],
     phone: { type: /^\d{11}$/, msg: "手机号有误" },
     tags: {
       type: (val) => Array.isArray(val) && val.length === 2,
@@ -68,8 +76,10 @@ export class Test2 {
     },
     page: { type: "number", optional: true, defaultValue: 1 },
     description: { type: "string", max: 500 },
-    status: { type: ["start", "stop"], optional: true },
-    power: [10, 50, 100],
+    user: {
+      type: "object",
+      fields: { id: { type: "number" } },
+    },
   })
   @Post("abc/:id")
   [sfn()](req: Request, res: Response) {

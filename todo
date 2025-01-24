@@ -4,14 +4,16 @@
 - 支持其他框架 koa Fastify
 
 - 支持 object
-// address: {
-//   type: 'object',
-//   optional: true,
-//   fields: {
-//     street: { type: 'string', optional: true },
-//     city: { type: 'string', optional: true },
-//     zip: { type: 'string', optional: true, len: 8, msg: 'invalid zip' },
-//   },
+
+// schema: {
+//   body: {
+//     name: string().min(3).max(100).required(),
+//     email: string().email().required()
+//   }
+// },
+
+- 明天测试，然后发版本
+
 
 ## 已完成
 - controller级别的use函数

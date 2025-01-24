@@ -68,15 +68,18 @@ useController(app, "admin", [Other, Other2, ...]);
 @Post("create/:id")
 @Body({
   name: "string",
+  status: ["start", "stop"],
   phone: { type: /^\d{11}$/, msg: "手机号有误" },
   tags: {
     type: (val) => Array.isArray(val) && val.length === 2,
     msg: "长度必须是2",
   },
-  page: { type: "number", defaultValue: 1 },
+  page: { type: "number", optional: true, defaultValue: 1 },
   description: { type: "string", max: 500 },
-  status: { type: ["start", "stop"], optional: true },
-  power: [10, 50, 100],
+  user: {
+    type: "object",
+    fields: { id: { type: "number" } },
+  },
 })
 @Param({ id: "snumber" })
 create(req, res) {}
@@ -88,15 +91,16 @@ create(req, res) {}
 type Rule =
   | "string"
   | "number"
-  | "snumber" // '123' | number
+  | "snumber" // '123'
   | "number[]"
   | "string[]"
   | "array"
   | "boolean"
-  | "sboolean" // 'true' | 'false' | boolean
+  | "sboolean" // 'true' | 'false'
+  | "object"
   | RegExp
   | ((val: any, req?: Request) => boolean) // custom validate
-  | (string | number)[]; // enum tuple
+  | (string | number)[]; // enum
 
 interface Schema {
   type: Rule;
@@ -105,8 +109,12 @@ interface Schema {
   min?: number;
   max?: number; // string:length | number:size
   defaultValue?: any;
+  fields?: SchemaOptions;
 }
-type Source = Rule | Schema;
+
+interface SchemaOptions {
+  [key: string]: Schema | Rule;
+}
 ```
 
 - `@Use`
