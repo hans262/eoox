@@ -121,7 +121,7 @@ class ArraySchemaBuilder extends SchemaBuilder {
   }
 }
 
-export const z = {
+export const e = {
   string: function () {
     const sb = new StringSchemaBuilder("string");
     sb.schema.validate = function (val: any) {

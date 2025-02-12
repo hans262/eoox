@@ -6,7 +6,7 @@ import {
   Post,
   sfn,
   Use,
-  z,
+  e,
 } from "../src/index.js";
 import type { Request, Response } from "express";
 
@@ -27,18 +27,18 @@ export class Test {
   }
 
   @Body({
-    // name: z.enums(["a", "b", "c"]).defaultValue("c"),
-    // name: z.object({ id: z.number().optional() }),
-    // name: z.string().defaultValue("John Doe").min(4),
-    name: z.string().length(2).errMsg("长度必须是2"),
-    // user: z
+    // name: e.enums(["a", "b", "c"]).defaultValue("c"),
+    // name: e.object({ id: e.number().optional() }),
+    // name: e.string().defaultValue("John Doe").min(4),
+    name: e.string().length(2).errMsg("长度必须是2"),
+    // user: e
     //   .object({
-    //     id: z.number().defaultValue(1).int(),
-    //     post: z.object({ id: z.number().defaultValue(222) }).optional(),
+    //     id: e.number().defaultValue(1).int(),
+    //     post: e.object({ id: e.number().defaultValue(222) }).optional(),
     //   })
     //   .defaultValue({ id: 2 }),
   })
-  @Param({ id: z.snumber() })
+  @Param({ id: e.snumber() })
   @Post("create/:id")
   [sfn()](req: Request, res: Response) {
     console.log(req.body);
@@ -59,18 +59,16 @@ export class Test2 {
   }
 
   @Body({
-    name: z.string(),
-    status: z.enums(["start", "stop"]),
-    phone: z
+    name: e.string(),
+    status: e.enums(["start", "stop"]),
+    phone: e
       .string()
       .pattern(/^\d{11}$/)
       .errMsg("手机号有误"),
-    tags: z
-      .func((val) => Array.isArray(val) && val.length === 2)
-      .errMsg("长度必须是2"),
-    page: z.number().defaultValue(1),
-    description: z.string().max(500),
-    user: z.object({ id: z.number() }),
+    tags: e.func((val) => Array.isArray(val) && val.length === 2),
+    page: e.number().defaultValue(1),
+    description: e.string().max(500),
+    user: e.object({ id: e.number() }),
   })
   @Post("abc/:id")
   [sfn()](req: Request, res: Response) {
