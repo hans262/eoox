@@ -65,55 +65,57 @@ useController(app, "admin", [Other, Other2, ...]);
 快速校验的你的参数，包含 `body|query|param` 中的参数。
 
 ```ts
+import { z } from "eoox";
+
 @Post("create/:id")
 @Body({
-  name: "string",
-  status: ["start", "stop"],
-  phone: { type: /^\d{11}$/, msg: "手机号有误" },
-  tags: {
-    type: (val) => Array.isArray(val) && val.length === 2,
-    msg: "长度必须是2",
-  },
-  page: { type: "number", optional: true, defaultValue: 1 },
-  description: { type: "string", max: 500 },
-  user: {
-    type: "object",
-    fields: { id: { type: "number" } },
-  },
+  name: z.string(),
+  status: z.enums(["start", "stop"]),
+  phone: z
+    .string()
+    .pattern(/^\d{11}$/)
+    .errMsg("手机号有误"),
+  tags: z
+    .func((val) => Array.isArray(val) && val.length === 2)
+    .errMsg("长度必须是2"),
+  page: z.number().defaultValue(1),
+  description: z.string().max(500),
+  user: z.object({ id: z.number() }),
 })
-@Param({ id: "snumber" })
+@Param({ id: z.snumber() })
 create(req, res) {}
 ```
 
 支持的验证类型和传参方式。
 
 ```ts
-type Rule =
-  | "string"
-  | "number"
-  | "snumber" // '123'
-  | "number[]"
-  | "string[]"
-  | "array"
-  | "boolean"
-  | "sboolean" // 'true' | 'false'
-  | "object"
-  | RegExp
-  | ((val: any, req?: Request) => boolean) // custom validate
-  | (string | number)[]; // enum
-
 interface Schema {
-  type: Rule;
-  msg?: string;
-  optional?: boolean;
-  min?: number;
-  max?: number; // string:length | number:size
+  rule:
+    | "string"
+    | "number"
+    | "snumber" // '123'
+    | "array"
+    | "boolean"
+    | "sboolean" // 'true' | 'false'
+    | "object"
+    | "enums"
+    | "func";
+  optional: boolean;
+  errMsg?: string;
   defaultValue?: any;
-  fields?: SchemaOptions;
-}
+  validate: (val: any, req?: Request) => boolean;
 
-interface SchemaOptions {
-  [key: string]: Schema | Rule;
+  min?: number;
+  max?: number; // string:max-length | number:max-size
+  length?: number; // string:length | array:length
+  pattern?: RegExp; // string:pattern
+  int?: boolean; // number:int
+
+  fields?: { [key: string]: Schema };
+  enums?: any[];
+  item?: "number" | "string"; // array:item
+
+  parent?: Schema;
 }
 ```
 

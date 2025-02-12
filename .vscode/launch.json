@@ -10,6 +10,13 @@
       "name": "TEST",
       "program": "${workspaceFolder}/example/index.ts",
       "outFiles": ["${workspaceFolder}/out/**/*.js"]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "TEST2",
+      "program": "${workspaceFolder}/example/test.ts",
+      "outFiles": ["${workspaceFolder}/out/**/*.js"]
     }
   ]
 }

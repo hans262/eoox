@@ -1,32 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
-
-type Rule =
-  | "string"
-  | "number"
-  | "snumber" // '123'
-  | "number[]"
-  | "string[]"
-  | "array"
-  | "boolean"
-  | "sboolean" // 'true' | 'false'
-  | "object"
-  | RegExp
-  | ((val: any, req?: Request) => boolean) // custom validate
-  | (string | number)[]; // enum
-
-interface Schema {
-  type: Rule;
-  msg?: string;
-  optional?: boolean;
-  min?: number;
-  max?: number; // string:length | number:size
-  defaultValue?: any;
-  fields?: SchemaOptions;
-}
-
-interface SchemaOptions {
-  [key: string]: Schema | Rule;
-}
+import { builderToSchema, Schema, SchemaOptions } from "./builder.js";
 
 export const Query = createSchema("query");
 export const Body = createSchema("body");
@@ -42,7 +15,7 @@ function createSchema(mode: "body" | "query" | "params") {
         next: NextFunction
       ) {
         const errors = [] as IError[];
-        const map = parseOpt(opt);
+        const map = parseOpt(builderToSchema(opt));
         // console.log(Array.from(map));
         for (const [keys, schema] of map) {
           const valid = new Validator(schema, req, mode, keys, this);
@@ -60,25 +33,22 @@ function createSchema(mode: "body" | "query" | "params") {
     };
 }
 
-function parseOpt(opt: SchemaOptions, parentKeys: string[] = []) {
+function parseOpt(
+  opt: { [key: string]: Schema },
+  parentKeys: string[] = [],
+  parentSchema?: Schema
+) {
   const map = new Map<string[], Schema>();
   for (let key in opt) {
     const mapKey = parentKeys.concat(key);
-    const source = opt[key];
-    const schema =
-      source instanceof RegExp
-        ? { type: source }
-        : source instanceof Function
-        ? { type: source }
-        : source instanceof Array
-        ? { type: source }
-        : source instanceof Object
-        ? source
-        : { type: source };
+    const schema = opt[key];
+
+    // 将父 Schema 赋值给当前 Schema
+    schema.parent = parentSchema;
 
     map.set(mapKey, schema);
     if (schema.fields) {
-      let tmp = parseOpt(schema.fields, mapKey);
+      let tmp = parseOpt(schema.fields, mapKey, schema);
       for (const [key, value] of tmp) {
         map.set(key, value);
       }
@@ -89,38 +59,49 @@ function parseOpt(opt: SchemaOptions, parentKeys: string[] = []) {
 
 interface IError {
   path: string;
-  expect: {
-    type: string | any[];
-    min?: number;
-    max?: number;
+  expect: Omit<Schema, "pattern" | "validate"> & {
+    pattern?: string | RegExp;
+    validate?: string | Function;
   };
   have: string;
   msg?: string;
 }
 
 class Validator {
-  hit = true; // 默认验证通过
-  error: IError; // 预期错误类型
+  hit = true; // 是否通过
+  error: IError;
   constructor(
-    private schema: Schema,
+    schema: Schema,
     private req: Request,
     private mode: "body" | "query" | "params",
     private keys: string[],
     private self: any
   ) {
-    const value = this.getValueByKeys();
+    const value = this.getValueByKeys(keys);
     this.error = {
       path: mode + "." + keys.join("."),
-      expect: { type: schema.type.toString() },
+      expect: { ...schema },
       have: value === undefined ? "undefined" : value,
-      msg: schema.msg,
+      msg: schema.errMsg,
     };
+
+    if (schema.rule === "func") {
+      this.error.expect.validate = schema.validate.toString();
+    }
+
+    if (schema.pattern) {
+      this.error.expect.pattern = schema.pattern.toString();
+    }
+
+    this.error.expect.parent = undefined;
+    this.error.expect.errMsg = undefined;
+    
     this.hit = this.checkHit(schema, value);
   }
 
-  private getValueByKeys() {
+  private getValueByKeys(keys: string[]) {
     let current = this.req[this.mode];
-    for (const key of this.keys) {
+    for (const key of keys) {
       if (current && current.hasOwnProperty(key)) {
         current = current[key];
       } else {
@@ -145,90 +126,30 @@ class Validator {
   }
 
   private checkHit(schema: Schema, value: any) {
-    const { type, optional, defaultValue } = schema;
+    const { optional, defaultValue, rule } = schema;
     let hit = true;
-    if (
-      value === undefined &&
-      (optional === true || defaultValue !== undefined)
-    ) {
-      //可选
+
+    // 检查当前键是否存在
+    // 如果当前键的父键的值都不存在，则直接跳出检查，默认通过检查
+    if (schema.parent) {
+      const parentKeys = this.keys.slice(0, -1);
+      const parentValue = this.getValueByKeys(parentKeys);
+      if (parentValue === undefined) {
+        return hit;
+      }
+    }
+
+    //可选
+    if (value === undefined && optional === true) {
+      //设置默认值
       if (defaultValue !== undefined) {
-        //设置默认值
         this.setValueByKeys(defaultValue);
       }
-    } else if (type instanceof Array) {
-      //枚举
-      hit = type.includes(value);
-      this.error.expect.type = type;
-    } else if (type instanceof RegExp) {
-      hit = value === undefined ? false : type.test(value);
-    } else if (type instanceof Function) {
-      hit = type.bind(this.self)(value, this.req);
+    } else if (rule === "func") {
+      hit = schema.validate.bind(this.self)(value, this.req);
     } else {
-      hit = this[type](value);
+      hit = schema.validate(value);
     }
     return hit;
-  }
-
-  string(val: any) {
-    const schema = this.schema;
-    if (typeof val === "string") {
-      if (typeof schema.max === "number" && val.length > schema.max) {
-        this.error.expect.max = schema.max;
-        return false;
-      }
-      if (typeof schema.min === "number" && val.length < schema.min) {
-        this.error.expect.min = schema.min;
-        return false;
-      }
-      return true;
-    }
-    return false;
-  }
-
-  number(val: any) {
-    const schema = this.schema;
-    if (typeof val === "number") {
-      if (typeof schema.max === "number" && val > schema.max) {
-        this.error.expect.max = schema.max;
-        return false;
-      }
-      if (typeof schema.min === "number" && val < schema.min) {
-        this.error.expect.min = schema.min;
-        return false;
-      }
-      return true;
-    }
-    return false;
-  }
-
-  snumber(val: any) {
-    return (
-      typeof val === "string" && val.length > 0 && !Number.isNaN(Number(val))
-    );
-  }
-
-  "number[]"(val: any) {
-    return Array.isArray(val) && val.every((v) => typeof v === "number");
-  }
-
-  "string[]"(val: any) {
-    return Array.isArray(val) && val.every((v) => typeof v === "string");
-  }
-
-  array(val: any) {
-    return Array.isArray(val);
-  }
-
-  boolean(val: any) {
-    return typeof val === "boolean";
-  }
-
-  sboolean(val: any) {
-    return ["true", "false"].includes(val);
-  }
-
-  object(val: any) {
-    return Object.prototype.toString.call(val) === "[object Object]";
   }
 }

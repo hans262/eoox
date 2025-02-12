@@ -3,8 +3,6 @@
 - 熟悉多线程
 - 支持其他框架 koa Fastify
 
-- 支持 object
-
 // schema: {
 //   body: {
 //     name: string().min(3).max(100).required(),
@@ -12,7 +10,9 @@
 //   }
 // },
 
-- 明天测试，然后发版本
+- rxjs 试下后端队列
+
+- 学习transformer论文 Attention is All You Need
 
 
 ## 已完成
@@ -25,3 +25,4 @@
 - 支持正确的预期字段
 - 装饰器的执行顺序是从上到下
 - 配置了defaultValue，不需要再配置optional
+- 支持 object
