@@ -65,7 +65,7 @@ useController(app, "admin", [Other, Other2, ...]);
 快速校验的你的参数，包含 `body|query|param` 中的参数。
 
 ```ts
-import { z } from "enpd";
+import { e } from "enpd";
 
 @Post("create/:id")
 @Body({
@@ -87,7 +87,7 @@ create(req, res) {}
 支持的验证类型和传参方式。
 
 ```ts
-// z.
+// e.
 // string
 // number
 // snumber
