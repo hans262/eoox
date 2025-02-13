@@ -9,7 +9,7 @@ app.use(express.json({ limit: "20mb" }));
 useController(app, "api", [Test]);
 useController(app, "admin", [Test2]);
 
-app.use(express.static("/Users/macbookair/Desktop/develop/eoox"));
+app.use(express.static("/Users/macbookair/Desktop/develop/enpd"));
 
 app.use(
   (

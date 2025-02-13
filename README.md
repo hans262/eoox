@@ -10,7 +10,7 @@
 ## 安装
 
 ```sh
-npm install eoox
+npm install enpd
 ```
 
 ## 装饰器
@@ -31,7 +31,7 @@ npm install eoox
 首先，创建你的控制器。
 
 ```ts
-import { Controller, Get, Post } from "eoox";
+import { Controller, Get, Post } from "enpd";
 
 @Controller("test")
 class Test {
@@ -50,7 +50,7 @@ class Test {
 然后使用它在你的 express 应用中。
 
 ```ts
-import { useController } from "eoox";
+import { useController } from "enpd";
 
 const app = express();
 useController(app, "api", [Test]);
@@ -65,22 +65,20 @@ useController(app, "admin", [Other, Other2, ...]);
 快速校验的你的参数，包含 `body|query|param` 中的参数。
 
 ```ts
-import { z } from "eoox";
+import { z } from "enpd";
 
 @Post("create/:id")
 @Body({
-  name: z.string(),
-  status: z.enums(["start", "stop"]),
-  phone: z
+  name: e.string(),
+  status: e.enums(["start", "stop"]),
+  phone: e
     .string()
     .pattern(/^\d{11}$/)
     .errMsg("手机号有误"),
-  tags: z
-    .func((val) => Array.isArray(val) && val.length === 2)
-    .errMsg("长度必须是2"),
-  page: z.number().defaultValue(1),
-  description: z.string().max(500),
-  user: z.object({ id: z.number() }),
+  tags: e.func((val) => Array.isArray(val) && val.length === 2),
+  page: e.number().defaultValue(1),
+  description: e.string().max(500),
+  user: e.object({ id: e.number() }),
 })
 @Param({ id: z.snumber() })
 create(req, res) {}
@@ -89,34 +87,16 @@ create(req, res) {}
 支持的验证类型和传参方式。
 
 ```ts
-interface Schema {
-  rule:
-    | "string"
-    | "number"
-    | "snumber" // '123'
-    | "array"
-    | "boolean"
-    | "sboolean" // 'true' | 'false'
-    | "object"
-    | "enums"
-    | "func";
-  optional: boolean;
-  errMsg?: string;
-  defaultValue?: any;
-  validate: (val: any, req?: Request) => boolean;
-
-  min?: number;
-  max?: number; // string:max-length | number:max-size
-  length?: number; // string:length | array:length
-  pattern?: RegExp; // string:pattern
-  int?: boolean; // number:int
-
-  fields?: { [key: string]: Schema };
-  enums?: any[];
-  item?: "number" | "string"; // array:item
-
-  parent?: Schema;
-}
+// z.
+// string
+// number
+// snumber
+// array
+// boolean
+// sboolean
+// object
+// enums
+// func
 ```
 
 - `@Use`
@@ -140,7 +120,7 @@ findAll(req, res) {}
 `symbol`函数名，不再为方法取名而烦恼。
 
 ```ts
-import { sfn } from "eoox";
+import { sfn } from "enpd";
 
 @Post("/create/:id")
 [sfn()](req, res) {}
