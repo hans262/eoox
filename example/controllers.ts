@@ -4,7 +4,7 @@ import type { Request, Response } from "express";
 export class Test {
   a = 2;
 
-  @Use( async function (req, res, next)  {
+  @Use(async function (req, res, next) {
     // throw new Error("拦截器错误");
     // console.log(this)
     // return res.json({ code: 401, message: "请登录" });
@@ -60,7 +60,7 @@ export class User {
     tags: e.func((val) => Array.isArray(val) && val.length === 2),
     page: e.number().defaultValue(1),
     description: e.string().max(500),
-    // user: e.object({ id: e.number() }), bug
+    user: e.object({ id: e.number() }),
   })
   @Post("update/:id")
   [sfn()](req: Request, res: Response) {

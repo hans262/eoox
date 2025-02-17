@@ -4,13 +4,10 @@ import { Test, User } from "./controllers.js";
 
 const app = express();
 const PORT = 3000;
-
 app.use(express.json({ limit: "20mb" }));
 
 use(app, "test", Test);
 use(app, "user", User);
-
-app.use(express.static("/Users/macbookair/Desktop/develop/enpd"));
 
 app.use(
   (
