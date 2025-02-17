@@ -4,8 +4,6 @@ import { posix } from "node:path";
 export type Method = "get" | "post" | "put" | "delete" | "patch";
 
 export interface Metadata {
-  /**控制器path，必传，不安装控制器装饰器，可能为undefined */
-  cpath?: string;
   /**方法路径，默认值 = '' */
   mpath?: string;
   /**控制器对象名称 */
@@ -14,8 +12,6 @@ export interface Metadata {
   method: Method;
   /**函数名称 */
   functionName: string | symbol;
-  /**控制器对象实例，挂装饰器才会有 */
-  instance?: any;
 }
 
 /**
@@ -29,30 +25,24 @@ export const metadatas: Metadata[] = [];
  * @param prefix api前缀
  * @param controllers 控制器集合
  */
-export const useController = (
+export const use = (
   app: Express,
   prefix: string,
-  controllers: (new () => any)[]
+  controller: new () => any
 ) => {
-  for (const c of controllers) {
-    const items = metadatas.filter((m) => m.constructorName === c.name);
-    for (const item of items) {
-      if (item.instance && item.cpath) {
-        const path = posix.join("/", prefix, item.cpath, item.mpath!);
-        // 自动收集中间件异常 express v5已经包含该功能
-        app[item.method](path, async (req, res, next) => {
-          try {
-            await item.instance[item.functionName].bind(item.instance)(
-              req,
-              res,
-              next
-            );
-          } catch (err) {
-            next(err);
-          }
-        });
+  const items = metadatas.filter((m) => m.constructorName === controller.name);
+  const instance = new controller();
+
+  for (const item of items) {
+    const path = posix.join("/", prefix, item.mpath!);
+    // 自动收集中间件异常 express v5已经包含该功能
+    app[item.method](path, async (req, res, next) => {
+      try {
+        await instance[item.functionName].bind(instance)(req, res, next);
+      } catch (err) {
+        next(err);
       }
-    }
+    });
   }
 };
 

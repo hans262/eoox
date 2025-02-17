@@ -87,15 +87,18 @@ class Validator {
 
     if (schema.rule === "func") {
       this.error.expect.validate = schema.validate.toString();
+    } else {
+      delete this.error.expect.validate;
     }
 
     if (schema.pattern) {
       this.error.expect.pattern = schema.pattern.toString();
     }
 
-    this.error.expect.parent = undefined;
-    this.error.expect.errMsg = undefined;
-    
+    delete this.error.expect.parent;
+    delete this.error.expect.fields;
+    delete this.error.expect.errMsg;
+    // console.log(this.error.expect);
     this.hit = this.checkHit(schema, value);
   }
 

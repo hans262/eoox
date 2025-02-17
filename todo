@@ -2,18 +2,23 @@
 - 校验某个header值
 - 熟悉多线程
 - 支持其他框架 koa Fastify
-
-// schema: {
-//   body: {
-//     name: string().min(3).max(100).required(),
-//     email: string().email().required()
-//   }
-// },
-
 - rxjs 试下后端队列
-
 - 学习transformer论文 Attention is All You Need
 
+
+```Test
+import { use } from "enpd";
+use(app, "/user", User);
+use(app, "/test", Test);
+
+class User {
+  @Get('info/:id')
+  getInfo(){}
+
+  @Post('info')
+  update(){}
+}
+```
 
 ## 已完成
 - controller级别的use函数

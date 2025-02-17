@@ -1,13 +1,14 @@
 import express from "express";
-import { useController } from "../src/index.js";
-import { Test, Test2 } from "./controllers.js";
+import { use } from "../src/index.js";
+import { Test, User } from "./controllers.js";
 
 const app = express();
 const PORT = 3000;
 
 app.use(express.json({ limit: "20mb" }));
-useController(app, "api", [Test]);
-useController(app, "admin", [Test2]);
+
+use(app, "test", Test);
+use(app, "user", User);
 
 app.use(express.static("/Users/macbookair/Desktop/develop/enpd"));
 

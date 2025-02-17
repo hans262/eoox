@@ -1,20 +1,12 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Post,
-  sfn,
-  Use,
-  e,
-} from "../src/index.js";
+import { Body, Get, Param, Post, sfn, Use, e } from "../src/index.js";
 import type { Request, Response } from "express";
 
-@Controller("test")
 export class Test {
   a = 2;
-  @Use(async (req, res, next) => {
+
+  @Use( async function (req, res, next)  {
     // throw new Error("拦截器错误");
+    // console.log(this)
     // return res.json({ code: 401, message: "请登录" });
     next();
   })
@@ -22,7 +14,7 @@ export class Test {
   // @Query({ name: { type: "snumber" } })
   async [sfn()](req: Request, res: Response) {
     // throw new Error("控制器错误");
-    // console.log(this.a);
+    console.log(this.a);
     res.json(req.query);
   }
 
@@ -31,6 +23,7 @@ export class Test {
     // name: e.object({ id: e.number().optional() }),
     // name: e.string().defaultValue("John Doe").min(4),
     name: e.string().length(2).errMsg("长度必须是2"),
+    user: e.object({ id: e.number() }),
     // user: e
     //   .object({
     //     id: e.number().defaultValue(1).int(),
@@ -51,9 +44,8 @@ export class Test {
   }
 }
 
-@Controller("test2")
-export class Test2 {
-  @Get("abc/:id")
+export class User {
+  @Get("info/:id")
   [sfn()](req: Request, res: Response) {
     res.json(req.params);
   }
@@ -68,9 +60,9 @@ export class Test2 {
     tags: e.func((val) => Array.isArray(val) && val.length === 2),
     page: e.number().defaultValue(1),
     description: e.string().max(500),
-    user: e.object({ id: e.number() }),
+    // user: e.object({ id: e.number() }), bug
   })
-  @Post("abc/:id")
+  @Post("update/:id")
   [sfn()](req: Request, res: Response) {
     res.json(req.params);
   }

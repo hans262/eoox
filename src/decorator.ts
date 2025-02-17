@@ -1,19 +1,6 @@
 import { metadatas, Method } from "./metadata.js";
 import type { Response, Request, NextFunction } from "express";
 
-export function Controller(cpath: string): ClassDecorator {
-  return (constructor: any) => {
-    const instance = new constructor();
-    for (let i = 0; i < metadatas.length; i++) {
-      const item = metadatas[i];
-      if (item.constructorName === constructor.name) {
-        item.cpath = cpath;
-        item.instance = instance;
-      }
-    }
-  };
-}
-
 function createMethodDecorator(method: Method) {
   return (mpath = ""): MethodDecorator =>
     (target, propertyKey) => {
@@ -56,7 +43,7 @@ export function Use(tf: Middleware): MethodDecorator {
       res: Response,
       next: NextFunction
     ) {
-      await tf(req, res, async () => {
+      await tf.bind(this)(req, res, async () => {
         try {
           await originalMethod.bind(this)(req, res, next);
         } catch (err) {
