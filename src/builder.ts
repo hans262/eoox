@@ -11,7 +11,8 @@ export interface Schema {
     | "object"
     | "enums"
     | "func";
-  optional: boolean;
+  optional?: boolean; // undefind
+  nullable?: boolean; // null
   errMsg?: string;
   defaultValue?: any;
   validate: (val: any, req?: Request) => boolean;
@@ -46,11 +47,19 @@ export function builderToSchema(opt: SchemaOptions) {
 export class SchemaBuilder {
   schema: Schema;
   constructor(rule: Schema["rule"]) {
-    this.schema = { rule, optional: false, validate: () => true };
+    this.schema = {
+      rule,
+      validate: () => true,
+    };
   }
 
   optional() {
     this.schema.optional = true;
+    return this;
+  }
+
+  nullable() {
+    this.schema.nullable = true;
     return this;
   }
 
@@ -160,7 +169,7 @@ export const e = {
 
   number: function () {
     const sb = new NumberSchemaBuilder("number");
-    sb.schema.validate = function (val: any) {
+    sb.schema.validate = function (val) {
       if (typeof val !== "number") {
         return false;
       }
@@ -174,8 +183,10 @@ export const e = {
       if (this.int && !Number.isInteger(val)) {
         return false;
       }
+
       return true;
     };
+
     return sb;
   },
 

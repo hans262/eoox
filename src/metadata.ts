@@ -28,21 +28,23 @@ export const metadatas: Metadata[] = [];
 export const use = (
   app: Express,
   prefix: string,
-  controller: new () => any
+  ...controllers: (new () => any)[]
 ) => {
-  const items = metadatas.filter((m) => m.constructorName === controller.name);
-  const instance = new controller();
+  for (const c of controllers) {
+    const items = metadatas.filter((m) => m.constructorName === c.name);
+    const instance = new c();
 
-  for (const item of items) {
-    const path = posix.join("/", prefix, item.mpath!);
-    // 自动收集中间件异常 express v5已经包含该功能
-    app[item.method](path, async (req, res, next) => {
-      try {
-        await instance[item.functionName].bind(instance)(req, res, next);
-      } catch (err) {
-        next(err);
-      }
-    });
+    for (const item of items) {
+      const path = posix.join("/", prefix, item.mpath!);
+      // 自动收集中间件异常 express v5已经包含该功能
+      app[item.method](path, async (req, res, next) => {
+        try {
+          await instance[item.functionName].bind(instance)(req, res, next);
+        } catch (err) {
+          next(err);
+        }
+      });
+    }
   }
 };
 

@@ -129,11 +129,11 @@ class Validator {
   }
 
   private checkHit(schema: Schema, value: any) {
-    const { optional, defaultValue, rule } = schema;
+    const { optional, defaultValue, rule, nullable } = schema;
     let hit = true;
 
     // 检查当前键是否存在
-    // 如果当前键的父键的值都不存在，则直接跳出检查，默认通过检查
+    // 如果当前键的父键的值都不存在，则直接跳出检查，默认通过
     if (schema.parent) {
       const parentKeys = this.keys.slice(0, -1);
       const parentValue = this.getValueByKeys(parentKeys);
@@ -142,17 +142,26 @@ class Validator {
       }
     }
 
-    //可选
+    //可选，设置默认值
     if (value === undefined && optional === true) {
-      //设置默认值
       if (defaultValue !== undefined) {
         this.setValueByKeys(defaultValue);
       }
-    } else if (rule === "func") {
+
+      return hit;
+    }
+
+    //允许null值
+    if (value === null && nullable === true) {
+      return hit;
+    }
+
+    if (rule === "func") {
       hit = schema.validate.bind(this.self)(value, this.req);
     } else {
       hit = schema.validate(value);
     }
+
     return hit;
   }
 }

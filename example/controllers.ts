@@ -22,8 +22,19 @@ export class Test {
     // name: e.enums(["a", "b", "c"]).defaultValue("c"),
     // name: e.object({ id: e.number().optional() }),
     // name: e.string().defaultValue("John Doe").min(4),
-    name: e.string().length(2).errMsg("长度必须是2"),
-    user: e.object({ id: e.number() }),
+    name: e.number(),
+    // audio: e.object({
+    //   tts: e.object({
+    //     text: e.array().item("string").length(2),
+    //     speed: e.number().min(0.5).max(2),
+    //     audio_man: e.string(),
+    //   }),
+    //   wav_url: e.string(),
+    //   type: e.enums(["tts", "audio"]),
+    //   volume: e.number().min(0).max(100),
+    //   language: e.enums(["cn"]),
+    // }),
+    // user: e.object({ id: e.number() }),
     // user: e
     //   .object({
     //     id: e.number().defaultValue(1).int(),
@@ -34,7 +45,7 @@ export class Test {
   @Param({ id: e.snumber() })
   @Post("create/:id")
   [sfn()](req: Request, res: Response) {
-    console.log(req.body);
+    console.log(req.body, req.params);
     res.json({ code: 200, msg: "ok" });
   }
 
