@@ -51,8 +51,11 @@ class Test {
 import { use } from "enpd";
 
 const app = express();
-use(app, "test", Test);
-use(app, "user", User);
+use.setup(app);
+
+use("test", Test);
+use("user", User);
+app.listen(8080);
 ```
 
 ## 高级用法

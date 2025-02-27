@@ -21,21 +21,20 @@ export const metadatas: Metadata[] = [];
 
 /**
  * 安装控制器
- * @param app Express实例
  * @param prefix api前缀
  * @param controllers 控制器集合
  */
-export const use = (
-  app: Express,
-  prefix: string,
-  ...controllers: (new () => any)[]
-) => {
+export const use = (prefix: string, ...controllers: (new () => any)[]) => {
   for (const c of controllers) {
     const items = metadatas.filter((m) => m.constructorName === c.name);
     const instance = new c();
 
     for (const item of items) {
       const path = posix.join("/", prefix, item.mpath!);
+      const app = use.app;
+      if (!app) {
+        throw new Error("请先调用 use.setup(app) 方法设置 app");
+      }
       // 自动收集中间件异常 express v5已经包含该功能
       app[item.method](path, async (req, res, next) => {
         try {
@@ -46,6 +45,11 @@ export const use = (
       });
     }
   }
+};
+
+use.app = null as Express | null;
+use.setup = function (app: Express) {
+  use.app = app;
 };
 
 /**

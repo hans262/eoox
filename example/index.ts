@@ -6,8 +6,9 @@ const app = express();
 const PORT = 3000;
 app.use(express.json({ limit: "20mb" }));
 
-use(app, "test", Test);
-use(app, "user", User);
+use.setup(app);
+use("test", Test);
+use("user", User);
 
 app.use(
   (
