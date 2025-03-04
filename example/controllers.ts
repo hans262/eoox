@@ -22,7 +22,7 @@ export class Test {
     // name: e.enums(["a", "b", "c"]).defaultValue("c"),
     // name: e.object({ id: e.number().optional() }),
     // name: e.string().defaultValue("John Doe").min(4),
-    name: e.number(),
+    // name: e.number(),
     // audio: e.object({
     //   tts: e.object({
     //     text: e.array().item("string").length(2),
@@ -42,10 +42,10 @@ export class Test {
     //   })
     //   .defaultValue({ id: 2 }),
   })
-  @Param({ id: e.snumber() })
+  @Param({ id: e.snumber().min(2).max(10).int() })
   @Post("create/:id")
   [sfn()](req: Request, res: Response) {
-    console.log(req.body, req.params);
+    console.log(req.params);
     res.json({ code: 200, msg: "ok" });
   }
 

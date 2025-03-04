@@ -191,11 +191,28 @@ export const e = {
   },
 
   snumber: function () {
-    const sb = new SchemaBuilder("snumber");
+    const sb = new NumberSchemaBuilder("snumber");
     sb.schema.validate = function (val: any) {
-      return (
-        typeof val === "string" && val.length > 0 && !Number.isNaN(Number(val))
-      );
+      let hit =
+        typeof val === "string" && val.length > 0 && !Number.isNaN(Number(val));
+
+      if (!hit) {
+        return false;
+      }
+
+      if (typeof this.max === "number" && val > this.max) {
+        return false;
+      }
+
+      if (typeof this.min === "number" && val < this.min) {
+        return false;
+      }
+
+      if (this.int && !Number.isInteger(Number(val))) {
+        return false;
+      }
+
+      return true;
     };
     return sb;
   },

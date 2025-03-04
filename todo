@@ -4,7 +4,6 @@
 - 支持其他框架 koa Fastify
 - rxjs 试下后端队列
 - 学习transformer论文 Attention is All You Need
-- snumber 继承 number
 
 ## 已完成
 - controller级别的use函数
@@ -19,3 +18,4 @@
 - 支持 object
 - use函数允许安装多个控制器
 - 校验允许null
+- snumber 继承 number
