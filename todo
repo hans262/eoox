@@ -6,6 +6,7 @@
 - 学习transformer论文 Attention is All You Need
 - enums的传参方式优化
 - 自动生成api文档
+- 支持any类型
 
 ## 已完成
 - controller级别的use函数
