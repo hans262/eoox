@@ -1,25 +1,13 @@
-import { metadatas, Method } from "./metadata.js";
+import { metadatas, Method, pushMeta } from "./metadata.js";
 import type { Response, Request, NextFunction } from "express";
 
 function createMethodDecorator(method: Method) {
-  return (mpath = ""): MethodDecorator =>
+  return (mpath?: string): MethodDecorator =>
     (target, propertyKey) => {
-      const meta = metadatas.find(
-        (m) =>
-          m.constructorName === target.constructor.name &&
-          m.functionName === propertyKey
-      );
-      if (meta) {
-        meta.method = method;
-        meta.mpath = mpath;
-      } else {
-        metadatas.push({
-          method,
-          mpath,
-          functionName: propertyKey,
-          constructorName: target.constructor.name,
-        });
-      }
+      pushMeta(target.constructor.name, propertyKey, {
+        method,
+        mpath,
+      });
     };
 }
 
@@ -32,7 +20,7 @@ export const Patch = createMethodDecorator("patch");
 type Middleware = (req: Request, res: Response, next: NextFunction) => any;
 
 /**
- * 中间件装饰器
+ * 方法中间件
  * @param tf
  */
 export function Use(tf: Middleware): MethodDecorator {
@@ -57,7 +45,7 @@ export function Use(tf: Middleware): MethodDecorator {
 }
 
 /**
- * 控制器级别的中间件装饰器
+ * 控制器中间件
  * @param tf
  */
 export function UseClass(tf: Middleware): ClassDecorator {

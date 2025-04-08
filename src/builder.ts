@@ -24,17 +24,21 @@ export interface Schema {
   int?: boolean; // number:int
 
   fields?: { [key: string]: Schema };
-  enums?: any[];
+  enums?: (string | number)[];
   item?: "number" | "string"; // array:item
 
   parent?: Schema;
 }
 
-export interface SchemaOptions {
+export interface SchemaBuilderOptions {
   [key: string]: SchemaBuilder;
 }
 
-export function builderToSchema(opt: SchemaOptions) {
+export interface SchemaOptions {
+  [key: string]: Schema;
+}
+
+export function builderToSchema(opt: SchemaBuilderOptions): SchemaOptions {
   let _fields: Schema["fields"] = {};
   for (let key in opt) {
     if (opt.hasOwnProperty(key)) {
@@ -98,7 +102,6 @@ class StringSchemaBuilder extends SchemaBuilder {
     this.schema.length = length;
     return this;
   }
-  //email
 }
 
 class NumberSchemaBuilder extends SchemaBuilder {
@@ -158,7 +161,7 @@ export const e = {
     return sb;
   },
 
-  object: function (opt: SchemaOptions) {
+  object: function (opt: SchemaBuilderOptions) {
     const sb = new SchemaBuilder("object");
     sb.schema.fields = builderToSchema(opt);
     sb.schema.validate = function (val: any) {
@@ -217,7 +220,7 @@ export const e = {
     return sb;
   },
 
-  enums: function (enums: any[]) {
+  enums: function (...enums: (string | number)[]) {
     const sb = new SchemaBuilder("enums");
     sb.schema.enums = enums;
     sb.schema.validate = function (val: any) {

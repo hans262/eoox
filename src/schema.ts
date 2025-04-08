@@ -1,13 +1,22 @@
 import type { NextFunction, Request, Response } from "express";
-import { builderToSchema, Schema, SchemaOptions } from "./builder.js";
+import {
+  builderToSchema,
+  Schema,
+  SchemaBuilderOptions,
+  SchemaOptions,
+} from "./builder.js";
+import { pushMeta } from "./metadata.js";
 
 export const Query = createSchema("query");
 export const Body = createSchema("body");
 export const Param = createSchema("params");
 
 function createSchema(mode: "body" | "query" | "params") {
-  return (opt: SchemaOptions): MethodDecorator =>
-    (_, __, descriptor: PropertyDescriptor) => {
+  return (opt: SchemaBuilderOptions): MethodDecorator =>
+    (target, propertyKey, descriptor: PropertyDescriptor) => {
+      const opts = builderToSchema(opt);
+      pushMeta(target.constructor.name, propertyKey, { [mode]: opts });
+
       const originalMethod = descriptor.value;
       descriptor.value = async function (
         req: Request,
@@ -15,7 +24,7 @@ function createSchema(mode: "body" | "query" | "params") {
         next: NextFunction
       ) {
         const errors = [] as IError[];
-        const map = parseOpt(builderToSchema(opt));
+        const map = parseOpt(opts);
         // console.log(Array.from(map));
         for (const [keys, schema] of map) {
           const valid = new Validator(schema, req, mode, keys, this);
@@ -34,7 +43,7 @@ function createSchema(mode: "body" | "query" | "params") {
 }
 
 function parseOpt(
-  opt: { [key: string]: Schema },
+  opt: SchemaOptions,
   parentKeys: string[] = [],
   parentSchema?: Schema
 ) {
@@ -132,8 +141,7 @@ class Validator {
     const { optional, defaultValue, rule, nullable } = schema;
     let hit = true;
 
-    // 检查当前键是否存在
-    // 如果当前键的父键的值都不存在，则直接跳出检查，默认通过
+    // 如果父键的值不存在，则直接跳出检查，默认通过
     if (schema.parent) {
       const parentKeys = this.keys.slice(0, -1);
       const parentValue = this.getValueByKeys(parentKeys);

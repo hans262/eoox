@@ -1,4 +1,13 @@
-import { Body, Get, Param, Post, sfn, Use, e } from "../src/index.js";
+import {
+  Body,
+  Get,
+  Param,
+  Post,
+  sfn,
+  Use,
+  e,
+  metadatas,
+} from "../src/index.js";
 import type { Request, Response } from "express";
 
 export class Test {
@@ -32,20 +41,21 @@ export class Test {
     //   wav_url: e.string(),
     //   type: e.enums(["tts", "audio"]),
     //   volume: e.number().min(0).max(100),
-    //   language: e.enums(["cn"]),
+    // language: e.enums(["cn"]),
     // }),
     // user: e.object({ id: e.number() }),
-    // user: e
-    //   .object({
-    //     id: e.number().defaultValue(1).int(),
-    //     post: e.object({ id: e.number().defaultValue(222) }).optional(),
-    //   })
-    //   .defaultValue({ id: 2 }),
+    user: e
+      .object({
+        id: e.number().defaultValue(1).int(),
+        post: e.object({ id: e.number().defaultValue(222) }).optional(),
+      })
+      .defaultValue({ id: 2 }),
   })
   @Param({ id: e.snumber().min(2).max(10).int() })
   @Post("create/:id")
   [sfn()](req: Request, res: Response) {
-    console.log(req.params);
+    console.log(req.params, req.body);
+    console.log(metadatas);
     res.json({ code: 200, msg: "ok" });
   }
 
@@ -63,7 +73,7 @@ export class User {
 
   @Body({
     name: e.string(),
-    status: e.enums(["start", "stop"]),
+    status: e.enums("start", "stop"),
     phone: e
       .string()
       .pattern(/^\d{11}$/)

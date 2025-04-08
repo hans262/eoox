@@ -1,12 +1,6 @@
 # todo
-- 校验某个header值
-- 熟悉多线程
 - 支持其他框架 koa Fastify
-- rxjs 试下后端队列
-- 学习transformer论文 Attention is All You Need
-- enums的传参方式优化
-- 自动生成api文档
-- 支持any类型
+- 文档翻译成英文
 
 ## 已完成
 - controller级别的use函数
@@ -22,3 +16,4 @@
 - use函数允许安装多个控制器
 - 校验允许null
 - snumber 继承 number
+- enums的传参方式优化

@@ -1,33 +1,33 @@
 # The Enpd
 
-The extension function of `Express` makes development simple, and everything is for happy work.
+`Express` 的扩展功能，让开发变得简单，一切为了快乐工作。
 
-- Use decorator syntax to define routes that comply with the `express` route hit rule;
-- Use decorator syntax to validate parameters, and write rules to automatically validate field types;
-- Automatically collect top-level exceptions within the 'request handling function' without the need for manual capture;
-- Provide additional functional decorators `@Use`.
+- 使用装饰器语法来定义路由，符合`express`的路由命中规则；
+- 使用装饰器语法来校验参数，编写好规则将自动验证字段类型；
+- 自动收集“请求处理函数”内顶层异常，无需手动捕获；
+- 提供额外的功能性装饰器`@Use`。
 
-## Install
+## 安装
 
 ```sh
 npm install enpd
 ```
 
-## Decorator
+## 装饰器
 
 - `@Get | @Post | @Put | @Delete | @Patch`
 - `@Body | @Query | @Param`
 - `@Use`
 
-You need to configure your tsconfig.json file:
+你需要配置你的 tsconfig.json 文件：
 
 ```json
 { "experimentalDecorators": true }
 ```
 
-## How to use
+## 怎么使用
 
-Firstly, create your controller.
+首先，创建你的控制器。
 
 ```ts
 import { Get, Post } from "enpd";
@@ -45,7 +45,7 @@ class Test {
 }
 ```
 
-Then use it in your Express application.
+然后使用它在你的 express 应用中。
 
 ```ts
 import { use } from "enpd";
@@ -58,11 +58,11 @@ use("user", User);
 app.listen(8080);
 ```
 
-## Advanced Usage
+## 高级用法
 
 - `@Body | @Query | @Param`
 
-Quickly verify your parameters, including those in `body | query | param`.
+快速校验的你的参数，包含 `body|query|param` 中的参数。
 
 ```ts
 import { e } from "enpd";
@@ -84,7 +84,7 @@ import { e } from "enpd";
 create(req, res) {}
 ```
 
-Supported validation types and parameter passing methods.
+支持的验证类型和传参方式。
 
 ```ts
 // e.
@@ -101,9 +101,9 @@ Supported validation types and parameter passing methods.
 
 - `@Use`
 
-Middleware decorator: a method level middleware that executes before the method and can be used for permission verification, interception, etc.
+中间件装饰器：方法级别的中间件，执行的顺序在该方法之前，可用于权限校验、拦截等。
 
-Another way of saying it is similar to the functionality of `Spring: AOP`, which gives request handling functions the ability of aspect oriented programming.
+另一种说法是类似于`Spring: AOP`的功能，让请求处理函数拥有面向切面编程的能力。
 
 ```ts
 @Use(async (req, res, next) => {
@@ -117,7 +117,7 @@ findAll(req, res) {}
 
 - `sfn`
 
-`Symbol` function names, no longer bothered by naming methods.
+`symbol`函数名，不再为方法取名而烦恼。
 
 ```ts
 import { sfn } from "enpd";
@@ -126,9 +126,9 @@ import { sfn } from "enpd";
 [sfn()](req, res) {}
 ```
 
-- Global Exception Collection
+- 全局异常收集
 
-Automatically collect top-level exceptions within the 'request handling function' without the need for manual capture. It can be received in the global exception middleware of 'express'.
+自动收集“请求处理函数”内顶层异常，无需手动捕获。可以在`express`的全局异常中间件中接收到。
 
 ```ts
 @Post("create/:id")
