@@ -1,6 +1,5 @@
 # todo
 - 支持其他框架 koa Fastify
-- 文档翻译成英文
 
 ## 已完成
 - controller级别的use函数
@@ -17,3 +16,4 @@
 - 校验允许null
 - snumber 继承 number
 - enums的传参方式优化
+- 文档翻译成英文

@@ -1,5 +1,5 @@
 import express from "express";
-import { use, metadatas } from "../src/index.js";
+import { use } from "../src/index.js";
 import { Test, User } from "./controllers.js";
 
 const app = express();

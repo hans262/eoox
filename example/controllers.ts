@@ -46,7 +46,7 @@ export class Test {
     // user: e.object({ id: e.number() }),
     user: e
       .object({
-        id: e.number().defaultValue(1).int(),
+        id: e.number().int(),
         post: e.object({ id: e.number().defaultValue(222) }).optional(),
       })
       .defaultValue({ id: 2 }),
