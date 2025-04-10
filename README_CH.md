@@ -70,7 +70,7 @@ import { e } from "enpd";
 @Post("create/:id")
 @Body({
   name: e.string(),
-  status: e.enums(["start", "stop"]),
+  status: e.enums("start", "stop"),
   phone: e
     .string()
     .pattern(/^\d{11}$/)
