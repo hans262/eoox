@@ -1,5 +1,6 @@
 # todo
 - 支持其他框架 koa Fastify
+- 完善Query装饰器的参数转换
 
 ## 已完成
 - controller级别的use函数
