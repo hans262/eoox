@@ -138,7 +138,7 @@ class Validator {
   }
 
   private checkHit(schema: Schema, value: any) {
-    const { optional, defaultValue, rule, nullable } = schema;
+    const { optional, defaultValue, rule, nullable, coerce } = schema;
     let hit = true;
 
     // 如果父键的值不存在，则直接跳出检查，默认通过
@@ -150,18 +150,28 @@ class Validator {
       }
     }
 
-    //可选，设置默认值
+    // 可选，设置默认值
     if (value === undefined && optional === true) {
       if (defaultValue !== undefined) {
+        // 设置默认值，继续走后面验证逻辑
         this.setValueByKeys(defaultValue);
+        value = defaultValue;
+      } else {
+        return hit;
       }
-
-      return hit;
     }
 
     //允许null值
     if (value === null && nullable === true) {
       return hit;
+    }
+
+    // 先强转
+    if (coerce) {
+      const r = coerceHandlers[coerce](value);
+      if (!r.ok) return false;
+      this.setValueByKeys(r.value);
+      value = r.value;
     }
 
     if (rule === "func") {
@@ -173,3 +183,22 @@ class Validator {
     return hit;
   }
 }
+
+const coerceHandlers = {
+  number(val: any) {
+    if (typeof val === "number" && Number.isFinite(val))
+      return { ok: true, value: val };
+    if (typeof val === "string") {
+      const s = val.trim();
+      if (s === "") return { ok: false }; // 避免空串=>0
+      const n = Number(s);
+      return Number.isFinite(n) ? { ok: true, value: n } : { ok: false };
+    }
+    if (typeof val === "boolean") return { ok: true, value: val ? 1 : 0 };
+    return { ok: false };
+  },
+  string(val: any) {
+    if (val === null || val === undefined) return { ok: false };
+    return { ok: true, value: String(val) };
+  },
+};

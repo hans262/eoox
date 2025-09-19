@@ -7,6 +7,7 @@ import {
   Use,
   e,
   metadatas,
+  Query,
 } from "../src/index.js";
 import type { Request, Response } from "express";
 
@@ -20,10 +21,13 @@ export class Test {
     next();
   })
   @Get()
-  // @Query({ name: { type: "snumber" } })
+  @Query({
+    name: e.coerce.number().min(10).defaultValue(12),
+  })
   async [sfn()](req: Request, res: Response) {
     // throw new Error("控制器错误");
-    console.log(this.a);
+    const { name } = req.query;
+    console.log(name, typeof name);
     res.json(req.query);
   }
 
@@ -46,16 +50,16 @@ export class Test {
     // user: e.object({ id: e.number() }),
     user: e
       .object({
-        id: e.number().int(),
+        id: e.coerce.number().optional(),
         post: e.object({ id: e.number().defaultValue(222) }).optional(),
       })
       .defaultValue({ id: 2 }),
   })
-  @Param({ id: e.snumber().min(2).max(10).int() })
+  @Param({ id: e.coerce.string() })
   @Post("create/:id")
   [sfn()](req: Request, res: Response) {
-    console.log(req.params, req.body);
-    console.log(metadatas);
+    console.log(req.params.id, typeof req.params.id);
+    console.log(req.body.user.id, typeof req.body.user.id);
     res.json({ code: 200, msg: "ok" });
   }
 

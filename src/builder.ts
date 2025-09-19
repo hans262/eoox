@@ -28,6 +28,8 @@ export interface Schema {
   item?: "number" | "string"; // array:item
 
   parent?: Schema;
+
+  coerce?: "number" | "string"; // 是否强转 -> 目标类型
 }
 
 export interface SchemaBuilderOptions {
@@ -70,9 +72,6 @@ export class SchemaBuilder {
   defaultValue(value: any) {
     this.schema.optional = true;
     this.schema.defaultValue = value;
-    if (!this.schema.validate(value)) {
-      throw new Error("DefaultValue Error");
-    }
     return this;
   }
 
@@ -134,6 +133,19 @@ class ArraySchemaBuilder extends SchemaBuilder {
 }
 
 export const e = {
+  coerce: {
+    number() {
+      const sb = e.number();
+      sb.schema.coerce = "number";
+      return sb;
+    },
+    string() {
+      const sb = e.string();
+      sb.schema.coerce = "string";
+      return sb;
+    },
+  },
+
   string: function () {
     const sb = new StringSchemaBuilder("string");
     sb.schema.validate = function (val: any) {

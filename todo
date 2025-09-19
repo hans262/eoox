@@ -1,6 +1,5 @@
 # todo
 - 支持其他框架 koa Fastify
-- 完善Query装饰器的参数转换
 
 ## 已完成
 - controller级别的use函数
@@ -18,3 +17,4 @@
 - snumber 继承 number
 - enums的传参方式优化
 - 文档翻译成英文
+- 完善装饰器参数强转功能
